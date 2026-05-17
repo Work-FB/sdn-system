@@ -345,7 +345,7 @@ async function crearEmpleado(){
 
     const response =
         await fetch(
-            "http://localhost:3000/crear-empleado",
+            "https://sdn-system.onrender.com/crear-empleado",
             {
                 method:"POST",
                 headers:{
@@ -400,7 +400,7 @@ async function cargarEmpleados(){
 
     const response =
         await fetch(
-            "http://localhost:3000/empleados-completo"
+            "https://sdn-system.onrender.com/empleados-completo"
         );
 
     const empleados =
@@ -471,7 +471,7 @@ async function eliminarEmpleado(id){
     )) return;
 
     await fetch(
-        `http://localhost:3000/eliminar-empleado/${id}`,
+        `https://sdn-system.onrender.com/eliminar-empleado/${id}`,
         {
             method:"DELETE"
         }

@@ -449,7 +449,7 @@ async function crearProducto(){
     }
 
     const response = await fetch(
-        "http://localhost:3000/crear-producto",
+        "https://sdn-system.onrender.com/crear-producto",
         {
             method:"POST",
             body:formData
@@ -469,7 +469,7 @@ async function crearProducto(){
 async function cargarProductos(){
 
     const response = await fetch(
-        "http://localhost:3000/productos"
+        "https://sdn-system.onrender.com/productos"
     );
 
     const productos =
@@ -502,7 +502,7 @@ async function cargarProductos(){
                     class="producto-img"
                     style="
                         background-image:url(
-                        'http://localhost:3000/uploads/${prod.imagen}'
+                        'https://sdn-system.onrender.com/uploads/${prod.imagen}'
                         )
                     "
                 ></div>
@@ -555,7 +555,7 @@ async function eliminarProducto(id){
     )) return;
 
     const response = await fetch(
-        `http://localhost:3000/eliminar-producto/${id}`,
+        `https://sdn-system.onrender.com/eliminar-producto/${id}`,
         {
             method:"DELETE"
         }

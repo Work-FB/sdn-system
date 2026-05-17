@@ -492,7 +492,7 @@ function mostrarToast(
 async function cargarEmpleados(){
 
     const response = await fetch(
-        "http://localhost:3000/empleados"
+        "https://sdn-system.onrender.com/empleados"
     );
 
     const empleados =
@@ -566,7 +566,7 @@ async function verificar(){
     try{
 
         const response = await fetch(
-            "http://localhost:3000/verificar-empleado",
+            "https://sdn-system.onrender.com/verificar-empleado",
             {
                 method:"POST",
                 headers:{
@@ -616,7 +616,7 @@ async function verificar(){
 async function registrar(tipo){
 
     const response = await fetch(
-        "http://localhost:3000/asistencia",
+        "https://sdn-system.onrender.com/asistencia",
         {
             method:"POST",
             headers:{

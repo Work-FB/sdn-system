@@ -331,7 +331,7 @@ async function registrarDecomiso(){
 
     const response =
         await fetch(
-            "http://localhost:3000/decomiso",
+            "https://sdn-system.onrender.com/decomiso",
             {
                 method:"POST",
                 headers:{
@@ -376,7 +376,7 @@ async function cargarDecomiso(){
 
     const response =
         await fetch(
-            "http://localhost:3000/decomiso"
+            "https://sdn-system.onrender.com/decomiso"
         );
 
     const decomisos =

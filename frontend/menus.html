@@ -524,7 +524,7 @@ async function crearMenu(){
         }
 
         const response = await fetch(
-            "http://localhost:3000/crear-menu",
+            "https://sdn-system.onrender.com/crear-menu",
             {
                 method:"POST",
                 body:formData
@@ -552,7 +552,7 @@ async function crearMenu(){
 async function cargarMenus(){
 
     const response = await fetch(
-        "http://localhost:3000/menus"
+        "https://sdn-system.onrender.com/menus"
     );
 
     const menus =
@@ -583,7 +583,7 @@ async function cargarMenus(){
                     class="menu-image"
                     style="
                     background-image:url(
-                    'http://localhost:3000/uploads/${menu.imagen}'
+                    'https://sdn-system.onrender.com/uploads/${menu.imagen}'
                     );
                     background-size:cover;
                     background-position:center;
@@ -641,7 +641,7 @@ async function eliminarMenu(id){
     )) return;
 
     const response = await fetch(
-        `http://localhost:3000/eliminar-menu/${id}`,
+        `https://sdn-system.onrender.com/eliminar-menu/${id}`,
         {
             method:"DELETE"
         }

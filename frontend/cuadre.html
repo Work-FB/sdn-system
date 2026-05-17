@@ -943,7 +943,7 @@ async function guardarCuadre(){
             ) || 0;
 
         const response = await fetch(
-            "http://localhost:3000/guardar-cuadre",
+            "https://sdn-system.onrender.com/guardar-cuadre",
             {
                 method:"POST",
                 headers:{
@@ -980,7 +980,7 @@ async function guardarCuadre(){
 async function cargarHistorial(){
 
     const response = await fetch(
-        "http://localhost:3000/historial-cuadres"
+        "https://sdn-system.onrender.com/historial-cuadres"
     );
 
     const data = await response.json();
@@ -1040,7 +1040,7 @@ async function guardarVenta(
 ){
 
     await fetch(
-        "http://localhost:3000/crear-venta",
+        "https://sdn-system.onrender.com/crear-venta",
         {
             method:"POST",
             headers:{
@@ -1063,7 +1063,7 @@ async function guardarVenta(
 async function cargarVentas(){
 
     const response = await fetch(
-        "http://localhost:3000/ventas"
+        "https://sdn-system.onrender.com/ventas"
     );
 
     const ventas =
@@ -1119,7 +1119,7 @@ async function crearGasto(){
         ).value;
 
     const response = await fetch(
-        "http://localhost:3000/crear-gasto",
+        "https://sdn-system.onrender.com/crear-gasto",
         {
             method:"POST",
             headers:{
@@ -1146,7 +1146,7 @@ async function crearGasto(){
 async function cargarGastos(){
 
     const response = await fetch(
-        "http://localhost:3000/gastos"
+        "https://sdn-system.onrender.com/gastos"
     );
 
     const gastos =
@@ -1188,7 +1188,7 @@ async function cargarGastos(){
 async function crearDeposito(){
 
     const response = await fetch(
-        "http://localhost:3000/crear-deposito",
+        "https://sdn-system.onrender.com/crear-deposito",
         {
             method:"POST",
             headers:{
@@ -1232,7 +1232,7 @@ async function crearDeposito(){
 async function cargarDepositos(){
 
     const response = await fetch(
-        "http://localhost:3000/depositos"
+        "https://sdn-system.onrender.com/depositos"
     );
 
     const depositos =
@@ -1282,7 +1282,7 @@ async function cargarDepositos(){
 async function guardarDolares(){
 
     const response = await fetch(
-        "http://localhost:3000/guardar-dolares",
+        "https://sdn-system.onrender.com/guardar-dolares",
         {
             method:"POST",
             headers:{
@@ -1370,7 +1370,7 @@ async function guardarDolares(){
 async function cargarReporteFinal(){
 
     const response = await fetch(
-        "http://localhost:3000/reporte-final"
+        "https://sdn-system.onrender.com/reporte-final"
     );
 
     const data =

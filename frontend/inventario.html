@@ -397,7 +397,7 @@ actualizarHora();
 async function cargarProductos(){
 
     const response = await fetch(
-        "http://localhost:3000/productos"
+        "https://sdn-system.onrender.com/productos"
     );
 
     const productos =
@@ -439,7 +439,7 @@ async function cargarProductos(){
 async function crearMovimiento(){
 
     const response = await fetch(
-        "http://localhost:3000/crear-movimiento",
+        "https://sdn-system.onrender.com/crear-movimiento",
         {
             method:"POST",
             headers:{
@@ -490,7 +490,7 @@ async function crearMovimiento(){
 async function cargarMovimientos(){
 
     const response = await fetch(
-        "http://localhost:3000/movimientos"
+        "https://sdn-system.onrender.com/movimientos"
     );
 
     const movimientos =
