@@ -1883,10 +1883,10 @@ app.get("/decomiso", (req, res) => {
    SERVIDOR
 ========================= */
 
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en puerto ${PORT}`);
-});
 
+app.listen(PORT, () => {
+    console.log("Servidor corriendo en puerto " + PORT);
+});
 
 app.get("/crear-admin", async (req, res) => {
 
