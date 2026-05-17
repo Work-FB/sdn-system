@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Caja • SDN</title>
+
+<link rel="preconnect"
+href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    font-family:'Poppins',sans-serif;
+    background:#f5f1e8;
+    display:flex;
+
+}
+
+/* SIDEBAR */
+
+.sidebar{
+
+    width:280px;
+    background:#111;
+    min-height:100vh;
+    padding:25px;
+    color:white;
+
+}
+
+.logo{
+
+    font-size:32px;
+    font-weight:700;
+    color:#d9b382;
+    margin-bottom:40px;
+
+}
+
+.logo span{
+
+    color:#2e7d32;
+
+}
+
+.nav{
+
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+
+}
+
+.nav button{
+
+    background:transparent;
+    border:none;
+    color:white;
+    padding:18px;
+    border-radius:16px;
+    text-align:left;
+    cursor:pointer;
+    transition:0.3s;
+    font-size:16px;
+
+}
+
+.nav button:hover{
+
+    background:#2e7d32;
+
+}
+
+.active{
+
+    background:#2e7d32 !important;
+
+}
+
+/* CONTENT */
+
+.content{
+
+    flex:1;
+    padding:30px;
+
+}
+
+.top{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+
+}
+
+.top h1{
+
+    font-size:36px;
+    color:#111;
+
+}
+
+.top p{
+
+    color:#555;
+    margin-top:8px;
+
+}
+
+/* TABLE */
+
+.table-container{
+
+    background:white;
+    padding:25px;
+    border-radius:25px;
+
+    overflow:auto;
+
+}
+
+table{
+
+    width:100%;
+    border-collapse:collapse;
+
+}
+
+th{
+
+    background:#111;
+    color:white;
+    padding:18px;
+
+}
+
+td{
+
+    padding:18px;
+    border-bottom:1px solid #eee;
+
+}
+
+.estado{
+
+    padding:8px 15px;
+    border-radius:12px;
+    color:white;
+    font-size:14px;
+    display:inline-block;
+
+}
+
+.completo{
+
+    background:#2e7d32;
+
+}
+
+.pendiente{
+
+    background:#f57c00;
+
+}
+
+.incompleto{
+
+    background:#c62828;
+
+}
+
+.ajustado{
+
+    background:#1565c0;
+
+}
+
+.guardar-btn{
+
+    background:#2e7d32;
+    color:white;
+    border:none;
+    padding:15px 25px;
+    border-radius:15px;
+    cursor:pointer;
+    font-size:16px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+    <div class="logo">
+
+        🔥 SDN
+        <span>Caja</span>
+
+    </div>
+
+    <div class="nav">
+
+        <button onclick="window.location.href='dashboard.html'">
+            🏠 Inicio
+        </button>
+
+        <button onclick="window.location.href='cuadre.html'">
+            📊 Control Ventas
+        </button>
+
+        <button class="active">
+            💰 Caja
+        </button>
+
+    </div>
+
+</div>
+
+<div class="content">
+
+    <div class="top">
+
+        <div>
+
+            <h1>
+                Caja General
+            </h1>
+
+            <p>
+                Historial financiero del negocio
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Fecha</th>
+                    <th>Ventas</th>
+                    <th>Gastos</th>
+                    <th>Total Final</th>
+                    <th>Faltante</th>
+                    <th>Estado</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="tablaCaja"></tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script>
+
+async function cargarCaja(){
+
+    const response =
+        await fetch(
+            "http://localhost:3000/caja"
+        );
+
+    const data =
+        await response.json();
+
+    const tabla =
+        document.getElementById(
+            "tablaCaja"
+        );
+
+    tabla.innerHTML = "";
+
+    data.forEach(caja => {
+
+        tabla.innerHTML += `
+
+        <tr>
+
+            <td>
+                ${caja.fecha}
+            </td>
+
+            <td>
+                RD$ ${caja.total_ventas}
+            </td>
+
+            <td>
+                RD$ ${caja.total_gastos}
+            </td>
+
+            <td>
+                RD$ ${caja.total_final}
+            </td>
+
+            <td>
+                RD$ ${caja.faltante}
+            </td>
+
+            <td>
+
+                <span class="
+                    estado
+                    ${caja.estado.toLowerCase()}
+                ">
+
+                    ${caja.estado}
+
+                </span>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+
+cargarCaja();
+
+</script>
+
+</body>
+</html>

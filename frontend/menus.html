@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Sazón Doña Nelta - Menús</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Poppins',sans-serif;
+    background:#f5f1e8;
+    display:flex;
+    height:100vh;
+    overflow:hidden;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    width:280px;
+    background:#111;
+    color:white;
+    padding:25px;
+    display:flex;
+    flex-direction:column;
+    border-right:4px solid #2e7d32;
+    box-shadow:5px 0 20px rgba(0,0,0,0.2);
+}
+
+.logo{
+    font-size:34px;
+    font-weight:700;
+    color:#d9b382;
+    margin-bottom:40px;
+    line-height:1.1;
+}
+
+.logo span{
+    color:#2e7d32;
+}
+
+.nav{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.nav-btn{
+    background:transparent;
+    border:none;
+    color:white;
+    padding:18px;
+    border-radius:16px;
+    text-align:left;
+    cursor:pointer;
+    font-size:17px;
+    transition:0.3s;
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.nav-btn:hover{
+    background:#2e7d32;
+    transform:translateX(5px);
+}
+
+.active{
+    background:#2e7d32;
+    box-shadow:0 0 15px rgba(46,125,50,0.5);
+}
+
+/* CONTENT */
+
+.content{
+    flex:1;
+    overflow:auto;
+    padding:30px;
+}
+
+/* TOPBAR */
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.topbar h1{
+    font-size:38px;
+    color:#111;
+}
+
+.clock{
+    background:white;
+    padding:15px 25px;
+    border-radius:18px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+    font-size:18px;
+    font-weight:600;
+}
+
+/* STATS */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    margin-bottom:30px;
+}
+
+.stat-card{
+    background:white;
+    border-radius:24px;
+    padding:25px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+    position:relative;
+    overflow:hidden;
+}
+
+.stat-card::before{
+    content:"";
+    position:absolute;
+    width:120px;
+    height:120px;
+    background:#2e7d32;
+    border-radius:50%;
+    top:-40px;
+    right:-40px;
+    opacity:0.1;
+}
+
+.stat-card h2{
+    font-size:38px;
+    color:#2e7d32;
+}
+
+.stat-card p{
+    color:#555;
+    margin-top:10px;
+}
+
+/* FORM */
+
+.form-card{
+    background:white;
+    padding:25px;
+    border-radius:25px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+    margin-bottom:30px;
+}
+
+.form{
+    display:grid;
+    grid-template-columns:
+1fr
+1fr
+1fr
+auto
+auto;
+    gap:15px;
+}
+
+input{
+    border:none;
+    background:#f3f3f3;
+    padding:18px;
+    border-radius:16px;
+    font-size:16px;
+    outline:none;
+}
+
+.add-btn{
+    border:none;
+    background:#2e7d32;
+    color:white;
+    border-radius:16px;
+    padding:18px 30px;
+    font-size:16px;
+    cursor:pointer;
+    transition:0.3s;
+    font-weight:600;
+}
+
+.add-btn:hover{
+    transform:scale(1.03);
+    background:#256428;
+}
+
+.upload-btn{
+
+    background:#ffffff;
+    color:#2e7d32;
+
+    border-radius:16px;
+
+    padding:18px 25px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    cursor:pointer;
+
+    font-size:30px;
+    font-weight:600;
+
+    transition:0.3s;
+
+}
+
+.upload-btn:hover{
+
+    background:#2e7d32;
+    color: white;
+    transform:scale(1.03);
+
+}
+
+/* PRODUCTS */
+
+.menu-list{
+    display:grid;
+    grid-template-columns:
+    repeat(auto-fit,minmax(280px,1fr));
+    gap:25px;
+}
+
+.menu-item{
+    background:white;
+    border-radius:28px;
+    overflow:hidden;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+    transition:0.3s;
+    position:relative;
+}
+
+.menu-item:hover{
+    transform:translateY(-8px);
+}
+
+.menu-image{
+    height:180px;
+    background:
+    linear-gradient(
+        135deg,
+        #2e7d32,
+        #43a047
+    );
+    position:relative;
+}
+
+.menu-image::after{
+    content:"🍽️";
+    position:absolute;
+    font-size:70px;
+    bottom:20px;
+    right:20px;
+    opacity:0.2;
+}
+
+.menu-content{
+    padding:22px;
+}
+
+.category{
+    display:inline-block;
+    background:#f5f1e8;
+    color:#333;
+    padding:8px 16px;
+    border-radius:50px;
+    font-size:14px;
+    margin-bottom:15px;
+}
+
+.menu-content h3{
+    font-size:24px;
+    color:#111;
+    margin-bottom:10px;
+}
+
+.price{
+    color:#2e7d32;
+    font-size:34px;
+    font-weight:700;
+    margin-top:20px;
+}
+
+.delete-btn{
+    width:100%;
+    border:none;
+    background:#d32f2f;
+    color:white;
+    padding:16px;
+    cursor:pointer;
+    font-size:16px;
+    margin-top:20px;
+    border-radius:14px;
+    transition:0.3s;
+}
+
+.delete-btn:hover{
+    background:#b71c1c;
+}
+
+/* SCROLL */
+
+::-webkit-scrollbar{
+    width:10px;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#2e7d32;
+    border-radius:20px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+    <div class="logo">
+         Sazón<br>
+        <span>Doña Nelta</span>
+    </div>
+
+    <div class="nav">
+
+        <button
+            class="nav-btn"
+            onclick="window.location.href='dashboard.html'"
+        >
+            🏠 Inicio
+        </button>
+
+        <button class="nav-btn active">
+            🍽️ Menús
+        </button>
+
+        <button
+            class="nav-btn"
+            onclick="window.location.href='cuadre.html'"
+        >
+            💰 Control de Ventas
+        </button>
+
+        <button class="nav-btn" onclick="window.location.href='inventario.html'">
+            📦 Inventario
+        </button>
+
+        <button class="nav-btn" onclick="window.location.href='productos.html'">
+            🛒 Productos
+        </button>
+
+        <button class="nav-btn">
+            👥 Empleados
+        </button>
+
+        <button
+            class="nav-btn"
+            onclick="window.location.href='asistencia.html'"
+        >
+            ⏰ Asistencia
+        </button>
+
+    </div>
+
+</div>
+
+<!-- CONTENT -->
+
+<div class="content">
+
+    <!-- TOP -->
+
+    <div class="topbar">
+
+        <h1>🍽️ Gestión de Menús</h1>
+
+        <div class="clock" id="clock"></div>
+
+    </div>
+
+    <!-- STATS -->
+
+    <div class="stats">
+
+        <div class="stat-card">
+            <h2 id="totalProductos">0</h2>
+            <p>Productos Registrados</p>
+        </div>
+
+        <div class="stat-card">
+            <h2 id="totalCategorias">0</h2>
+            <p>Categorías</p>
+        </div>
+
+        <label class="upload-btn">
+
+            ➕ Imagen
+
+            <input
+            type="file"
+            id="imagen"
+            hidden
+            >
+
+        </label>
+
+        <div class="stat-card">
+            <h2 id="valorMenu">RD$ 0</h2>
+            <p>Valor Total del Menú</p>
+        </div>
+
+    </div>
+
+    <!-- FORM -->
+
+    <div class="form-card">
+
+        <div class="form">
+
+            <input
+                type="text"
+                id="nombre"
+                placeholder="Nombre del producto"
+            >
+
+            <input
+                type="number"
+                id="precio"
+                placeholder="Precio"
+            >
+
+            <input
+                type="text"
+                id="categoria"
+                placeholder="Categoría"
+            >
+
+            <button
+                class="add-btn"
+                onclick="crearMenu()"
+            >
+                Agregar
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- PRODUCTS -->
+
+    <div
+        class="menu-list"
+        id="menuList"
+    ></div>
+
+</div>
+
+<script>
+
+/* CLOCK */
+
+function actualizarHora(){
+
+    const ahora = new Date();
+
+    document.getElementById("clock")
+    .innerText =
+        ahora.toLocaleTimeString();
+
+}
+
+setInterval(actualizarHora,1000);
+
+actualizarHora();
+
+/* CREAR MENU */
+
+async function crearMenu(){
+
+    try{
+
+        const nombre =
+            document.getElementById("nombre").value;
+
+        const precio =
+            document.getElementById("precio").value;
+
+        const categoria =
+            document.getElementById("categoria").value;
+
+        const imagen =
+            document.getElementById("imagen").files[0];
+
+        const formData = new FormData();
+
+        formData.append("nombre", nombre);
+        formData.append("precio", precio);
+        formData.append("categoria", categoria);
+
+        if(imagen){
+
+            formData.append("imagen", imagen);
+
+        }
+
+        const response = await fetch(
+            "http://localhost:3000/crear-menu",
+            {
+                method:"POST",
+                body:formData
+            }
+        );
+
+        const data = await response.json();
+
+        alert(data.mensaje);
+
+        cargarMenus();
+
+    }catch(error){
+
+        console.log(error);
+
+        alert("Error servidor");
+
+    }
+
+}
+
+/* CARGAR MENUS */
+
+async function cargarMenus(){
+
+    const response = await fetch(
+        "http://localhost:3000/menus"
+    );
+
+    const menus =
+        await response.json();
+
+    const menuList =
+        document.getElementById("menuList");
+
+    menuList.innerHTML = "";
+
+    let total = 0;
+
+    const categorias = new Set();
+
+    menus.forEach(menu => {
+
+        total += parseFloat(menu.precio);
+
+        categorias.add(
+            menu.categoria || "General"
+        );
+
+        menuList.innerHTML += `
+
+            <div class="menu-item">
+
+                <div
+                    class="menu-image"
+                    style="
+                    background-image:url(
+                    'http://localhost:3000/uploads/${menu.imagen}'
+                    );
+                    background-size:cover;
+                    background-position:center;
+                    "
+                ></div>
+                <div class="menu-content">
+
+                    <div class="category">
+                        ${menu.categoria || "General"}
+                    </div>
+
+                    <h3>
+                        ${menu.nombre}
+                    </h3>
+
+                    <div class="price">
+                        RD$ ${menu.precio}
+                    </div>
+
+                    <button
+                        class="delete-btn"
+                        onclick="eliminarMenu(${menu.id})"
+                    >
+                        Eliminar
+                    </button>
+
+                </div>
+
+            </div>
+
+        `;
+
+    });
+
+    document.getElementById(
+        "totalProductos"
+    ).innerText = menus.length;
+
+    document.getElementById(
+        "totalCategorias"
+    ).innerText = categorias.size;
+
+    document.getElementById(
+        "valorMenu"
+    ).innerText = `RD$ ${total}`;
+
+}
+
+/* ELIMINAR */
+
+async function eliminarMenu(id){
+
+    if(!confirm(
+        "Eliminar producto?"
+    )) return;
+
+    const response = await fetch(
+        `http://localhost:3000/eliminar-menu/${id}`,
+        {
+            method:"DELETE"
+        }
+    );
+
+    const data = await response.json();
+
+    alert(data.mensaje);
+
+    cargarMenus();
+
+}
+
+cargarMenus();
+
+</script>
+
+</body>
+</html>

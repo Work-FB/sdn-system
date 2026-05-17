@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cuadre</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    background:#f5f5f5;
+    padding:20px;
+}
+
+h1{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.container{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:25px;
+}
+
+.box{
+    background:white;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border-radius:10px;
+    border:1px solid #ccc;
+}
+
+button{
+    padding:15px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+}
+
+.add-btn{
+    background:#4caf50;
+    color:white;
+    width:100%;
+    margin-top:15px;
+}
+
+.save-btn{
+    background:#111;
+    color:white;
+    width:100%;
+    margin-top:20px;
+}
+
+.producto{
+    display:flex;
+    gap:10px;
+    margin-top:10px;
+}
+
+.total{
+    margin-top:20px;
+    font-size:22px;
+    font-weight:bold;
+}
+
+.money-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+
+.historial{
+    margin-top:40px;
+}
+
+.historial-item{
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    margin-top:15px;
+}
+
+.ok{
+    color:green;
+}
+
+.bad{
+    color:red;
+}
+
+.ventas-section{
+
+    background:white;
+    padding:25px;
+    border-radius:25px;
+    margin-bottom:25px;
+
+}
+
+.historial{
+
+    background:white;
+    padding:25px;
+    border-radius:25px;
+
+}
+
+table{
+
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+
+}
+
+th{
+
+    background:#111;
+    color:white;
+    padding:15px;
+
+}
+
+td{
+
+    padding:15px;
+    border-bottom:1px solid #eee;
+
+}
+
+tr:hover{
+    background:#f9f9f9;
+}
+
+.gastos-section{
+
+    background:white;
+    padding:25px;
+    border-radius:25px;
+    margin-top:25px;
+
+}
+
+.gasto-form{
+
+    display:flex;
+    gap:15px;
+    margin:20px 0;
+
+}
+
+.gasto-form input{
+
+    flex:1;
+
+}
+
+.gasto-form button{
+
+    background:#c62828;
+    color:white;
+    border:none;
+    padding:15px 25px;
+    border-radius:14px;
+    cursor:pointer;
+
+}
+
+.depositos-section{
+
+    background:white;
+    padding:25px;
+    border-radius:25px;
+    margin-top:25px;
+
+}
+
+.deposito-form{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(200px,1fr));
+
+    gap:15px;
+
+    margin:20px 0;
+
+}
+
+.deposito-form button{
+
+    background:#1565c0;
+    color:white;
+    border:none;
+    border-radius:14px;
+    cursor:pointer;
+
+}
+
+.dolares-section{
+
+    background:white;
+    padding:25px;
+    border-radius:25px;
+    margin-top:25px;
+
+}
+
+.dolares-grid{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(150px,1fr));
+
+    gap:15px;
+
+    margin-top:20px;
+
+}
+
+.dolares-grid button{
+
+    background:#2e7d32;
+    color:white;
+    border:none;
+    border-radius:14px;
+    cursor:pointer;
+
+}
+
+.usd-resultados{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(200px,1fr));
+
+    gap:20px;
+
+    margin-top:25px;
+
+}
+
+.usd-card{
+
+    background:#111;
+    color:white;
+    padding:25px;
+    border-radius:20px;
+
+}
+
+.usd-card p{
+
+    font-size:32px;
+    margin-top:10px;
+    color:#4caf50;
+
+}
+
+.dolares-section{
+
+    background:white;
+    padding:25px;
+    border-radius:25px;
+    margin-top:25px;
+
+}
+
+.dolares-grid{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(150px,1fr));
+
+    gap:15px;
+
+    margin-top:20px;
+
+}
+
+.dolares-grid button{
+
+    background:#2e7d32;
+    color:white;
+    border:none;
+    border-radius:14px;
+    cursor:pointer;
+
+}
+
+.usd-resultados{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(200px,1fr));
+
+    gap:20px;
+
+    margin-top:25px;
+
+}
+
+.usd-card{
+
+    background:#111;
+    color:white;
+    padding:25px;
+    border-radius:20px;
+
+}
+
+.usd-card p{
+
+    font-size:32px;
+    margin-top:10px;
+    color:#4caf50;
+
+}
+
+.reporte-final{
+
+    background:white;
+    padding:30px;
+    border-radius:30px;
+    margin-top:30px;
+
+}
+
+.report-grid{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(220px,1fr));
+
+    gap:20px;
+
+    margin-top:25px;
+
+}
+
+.report-card{
+
+    background:#111;
+    color:white;
+    padding:25px;
+    border-radius:22px;
+
+}
+
+.report-card p{
+
+    font-size:32px;
+    margin-top:10px;
+    color:#4caf50;
+
+}
+
+.total-final{
+
+    margin-top:35px;
+    background:#2e7d32;
+    color:white;
+    padding:35px;
+    border-radius:25px;
+    text-align:center;
+
+}
+
+.total-final p{
+
+    font-size:48px;
+    margin-top:15px;
+    font-weight:bold;
+
+}
+
+</style>
+
+</head>
+
+<body>
+<div class="sidebar">
+
+    <div class="logo">
+
+        🔥 SDN
+
+        <span>
+            Control
+        </span>
+
+    </div>
+
+    <div class="nav">
+
+        <button
+            class="nav-btn"
+            onclick="window.location.href='dashboard.html'"
+        >
+            🏠 Inicio
+        </button>
+
+        <button
+            class="nav-btn"
+            onclick="window.location.href='menus.html'"
+        >
+            🍽️ Menús
+        </button>
+
+        <button
+            class="nav-btn"
+            onclick="window.location.href='productos.html'"
+        >
+            📦 Productos
+        </button>
+
+        <button
+            class="nav-btn"
+            onclick="window.location.href='inventario.html'"
+        >
+            📊 Inventario
+        </button>
+
+        <button
+            class="nav-btn"
+            onclick="window.location.href='asistencia.html'"
+        >
+            ⏰ Asistencia
+        </button>
+
+        <button
+            class="nav-btn active"
+        >
+            💰 Control Ventas
+        </button>
+
+    </div>
+
+</div>
+
+
+<h1>💰 Cuadre de Caja</h1>
+
+<div class="container">
+
+    <div class="box">
+
+        <h2>Productos Vendidos</h2>
+
+<div class="ventas-section">
+
+    <h2>
+        🧾 Ventas del Día
+    </h2>
+
+    <div id="productos"></div>
+
+</div>
+
+<div class="historial">
+
+    <h2>
+        📊 Historial de Ventas
+    </h2>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Total</th>
+                <th>Hora</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="tablaVentas"></tbody>
+
+    </table>
+
+</div>
+
+        <button
+            class="add-btn"
+            onclick="agregarProducto()"
+        >
+            + Agregar Producto
+        </button>
+
+        <div class="total">
+            Ventas:
+            RD$
+            <span id="totalVentas">0</span>
+        </div>
+
+    </div>
+
+    <div class="box">
+
+        <h2>Efectivo</h2>
+
+        <div class="money-grid" id="moneyGrid"></div>
+
+        <div class="total">
+            Efectivo:
+            RD$
+            <span id="totalEfectivo">0</span>
+        </div>
+
+        <div class="total">
+            Diferencia:
+            RD$
+            <span id="diferencia">0</span>
+        </div>
+
+        <button
+            class="save-btn"
+            onclick="guardarCuadre()"
+        >
+            Guardar Cuadre
+        </button>
+
+    </div>
+
+</div>
+
+<div class="historial">
+
+    <h2>Historial</h2>
+
+    <div id="historial"></div>
+
+</div>
+
+<div class="gastos-section">
+
+    <h2>
+        💸 Gastos del Día
+    </h2>
+
+    <div class="gasto-form">
+
+        <input
+            type="text"
+            id="descripcionGasto"
+            placeholder="Descripción"
+        >
+
+        <input
+            type="number"
+            id="montoGasto"
+            placeholder="Monto"
+        >
+
+        <button onclick="crearGasto()">
+            Agregar Gasto
+        </button>
+
+    </div>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Descripción</th>
+                <th>Monto</th>
+                <th>Hora</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="tablaGastos"></tbody>
+
+    </table>
+
+</div>
+
+<div class="depositos-section">
+
+    <h2>
+        🏦 Depósitos
+    </h2>
+
+    <div class="deposito-form">
+
+        <input
+            type="text"
+            id="clienteDeposito"
+            placeholder="Cliente"
+        >
+
+        <input
+            type="number"
+            id="montoDeposito"
+            placeholder="Monto"
+        >
+
+        <input
+            type="text"
+            id="bancoDeposito"
+            placeholder="Banco"
+        >
+
+        <input
+            type="text"
+            id="referenciaDeposito"
+            placeholder="Referencia"
+        >
+
+        <button onclick="crearDeposito()">
+            Registrar
+        </button>
+
+    </div>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Cliente</th>
+                <th>Monto</th>
+                <th>Banco</th>
+                <th>Referencia</th>
+                <th>Hora</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="tablaDepositos"></tbody>
+
+    </table>
+
+</div>
+
+<div class="dolares-section">
+
+    <h2>
+        💵 Control de Dólares
+    </h2>
+
+    <div class="dolares-grid">
+
+        <input type="number" id="usd1" placeholder="$1">
+        <input type="number" id="usd2" placeholder="$2">
+        <input type="number" id="usd5" placeholder="$5">
+        <input type="number" id="usd10" placeholder="$10">
+        <input type="number" id="usd20" placeholder="$20">
+        <input type="number" id="usd50" placeholder="$50">
+        <input type="number" id="usd100" placeholder="$100">
+
+        <input
+            type="number"
+            id="tasa"
+            placeholder="Tasa dólar"
+        >
+
+        <button onclick="guardarDolares()">
+            Guardar
+        </button>
+
+    </div>
+
+    <div class="usd-resultados">
+
+        <div class="usd-card">
+
+            <h3>Total USD</h3>
+
+            <p id="totalUSD">
+                $0
+            </p>
+
+        </div>
+
+        <div class="usd-card">
+
+            <h3>Total DOP</h3>
+
+            <p id="totalDOP">
+                RD$0
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="reporte-final">
+
+    <h2>
+        📊 Reporte Final
+    </h2>
+
+    <div class="report-grid">
+
+        <div class="report-card">
+
+            <h3>
+                🧾 Ventas
+            </h3>
+
+            <p id="reporteVentas">
+                RD$ 0
+            </p>
+
+        </div>
+
+        <div class="report-card">
+
+            <h3>
+                💸 Gastos
+            </h3>
+
+            <p id="reporteGastos">
+                RD$ 0
+            </p>
+
+        </div>
+
+        <div class="report-card">
+
+            <h3>
+                🏦 Depósitos
+            </h3>
+
+            <p id="reporteDepositos">
+                RD$ 0
+            </p>
+
+        </div>
+
+        <div class="report-card">
+
+            <h3>
+                💵 Dólares
+            </h3>
+
+            <p id="reporteDolares">
+                RD$ 0
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="total-final">
+
+        <h1>
+            TOTAL FINAL
+        </h1>
+
+        <p id="totalFinal">
+            RD$ 0
+        </p>
+
+    </div>
+
+</div>
+
+<script>
+
+const denominaciones = [
+    5,10,25,50,100,200,500,1000,2000
+];
+
+const moneyGrid =
+    document.getElementById("moneyGrid");
+
+denominaciones.forEach(valor => {
+
+    moneyGrid.innerHTML += `
+        <div>
+
+            <label>
+                RD$ ${valor}
+            </label>
+
+            <input
+                type="number"
+                min="0"
+                value="0"
+                id="d${valor}"
+                oninput="calcularTodo()"
+            >
+
+        </div>
+    `;
+
+});
+
+function agregarProducto(){
+
+    const contenedor =
+        document.getElementById("productos");
+
+    const div =
+        document.createElement("div");
+
+    div.className = "producto";
+
+    div.innerHTML = `
+
+        <input
+            type="text"
+            placeholder="Producto"
+            class="nombre"
+        >
+
+        <input
+            type="number"
+            placeholder="Precio"
+            class="precio"
+        >
+
+    `;
+
+    contenedor.appendChild(div);
+
+    const precioInput =
+        div.querySelector(".precio");
+
+    precioInput.addEventListener(
+        "input",
+        calcularTodo
+    );
+
+    guardarVenta(
+    nombre,
+    cantidad,
+    precio
+);
+}
+
+function calcularTodo(){
+
+    let ventas = 0;
+
+    const precios =
+        document.querySelectorAll(".precio");
+
+    precios.forEach(input => {
+
+        const valor =
+            parseFloat(input.value) || 0;
+
+        ventas += valor;
+
+    });
+
+    document.getElementById(
+        "totalVentas"
+    ).innerText = ventas;
+
+    let efectivo = 0;
+
+    denominaciones.forEach(valor => {
+
+        const cantidad =
+            parseInt(
+                document.getElementById(
+                    `d${valor}`
+                ).value
+            ) || 0;
+
+        efectivo += valor * cantidad;
+
+    });
+
+    document.getElementById(
+        "totalEfectivo"
+    ).innerText = efectivo;
+
+    const diferencia =
+        efectivo - ventas;
+
+    document.getElementById(
+        "diferencia"
+    ).innerText = diferencia;
+
+}
+
+async function guardarCuadre(){
+
+    try{
+
+        const productos = [];
+
+        document.querySelectorAll(".producto")
+        .forEach(prod => {
+
+            const nombre =
+                prod.querySelector(".nombre").value;
+
+            const precio =
+                parseFloat(
+                    prod.querySelector(".precio").value
+                ) || 0;
+
+            productos.push({
+                nombre,
+                precio
+            });
+
+        });
+
+        const total_ventas =
+            parseFloat(
+                document.getElementById(
+                    "totalVentas"
+                ).innerText
+            ) || 0;
+
+        const total_efectivo =
+            parseFloat(
+                document.getElementById(
+                    "totalEfectivo"
+                ).innerText
+            ) || 0;
+
+        const response = await fetch(
+            "http://localhost:3000/guardar-cuadre",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    total_ventas,
+                    total_efectivo,
+                    productos
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        console.log(data);
+
+        alert(
+            data.mensaje +
+            "\nDiferencia: RD$ " +
+            data.diferencia
+        );
+
+    }catch(error){
+
+        console.log(error);
+
+        alert("Error guardando cuadre");
+
+    }
+
+}
+
+async function cargarHistorial(){
+
+    const response = await fetch(
+        "http://localhost:3000/historial-cuadres"
+    );
+
+    const data = await response.json();
+
+    const historial =
+        document.getElementById("historial");
+
+    historial.innerHTML = "";
+
+    data.forEach(item => {
+
+        const diferencia =
+            item.total_efectivo -
+            item.total_ventas;
+
+        historial.innerHTML += `
+
+            <div class="historial-item">
+
+                <h3>
+                    ${item.fecha}
+                </h3>
+
+                <p>
+                    Ventas:
+                    RD$ ${item.total_ventas}
+                </p>
+
+                <p>
+                    Efectivo:
+                    RD$ ${item.total_efectivo}
+                </p>
+
+                <p class="${
+                    diferencia >= 0
+                    ? 'ok'
+                    : 'bad'
+                }">
+
+                    Diferencia:
+                    RD$ ${diferencia}
+
+                </p>
+
+            </div>
+
+        `;
+
+    });
+
+}
+
+async function guardarVenta(
+    producto,
+    cantidad,
+    precio
+){
+
+    await fetch(
+        "http://localhost:3000/crear-venta",
+        {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+
+                producto,
+                cantidad,
+                precio
+
+            })
+        }
+    );
+
+    cargarVentas();
+
+}
+
+async function cargarVentas(){
+
+    const response = await fetch(
+        "http://localhost:3000/ventas"
+    );
+
+    const ventas =
+        await response.json();
+
+    const tabla =
+        document.getElementById(
+            "tablaVentas"
+        );
+
+    tabla.innerHTML = "";
+
+    ventas.forEach(v => {
+
+        tabla.innerHTML += `
+
+            <tr>
+
+                <td>
+                    ${v.producto}
+                </td>
+
+                <td>
+                    ${v.cantidad}
+                </td>
+
+                <td>
+                    RD$ ${v.total}
+                </td>
+
+                <td>
+                    ${v.hora}
+                </td>
+
+            </tr>
+
+        `;
+
+    });
+
+}
+
+async function crearGasto(){
+
+    const descripcion =
+        document.getElementById(
+            "descripcionGasto"
+        ).value;
+
+    const monto =
+        document.getElementById(
+            "montoGasto"
+        ).value;
+
+    const response = await fetch(
+        "http://localhost:3000/crear-gasto",
+        {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+
+                descripcion,
+                monto
+
+            })
+        }
+    );
+
+    const data =
+        await response.json();
+
+    alert(data.mensaje);
+
+    cargarGastos();
+
+}
+
+async function cargarGastos(){
+
+    const response = await fetch(
+        "http://localhost:3000/gastos"
+    );
+
+    const gastos =
+        await response.json();
+
+    const tabla =
+        document.getElementById(
+            "tablaGastos"
+        );
+
+    tabla.innerHTML = "";
+
+    gastos.forEach(g => {
+
+        tabla.innerHTML += `
+
+            <tr>
+
+                <td>
+                    ${g.descripcion}
+                </td>
+
+                <td>
+                    RD$ ${g.monto}
+                </td>
+
+                <td>
+                    ${g.hora}
+                </td>
+
+            </tr>
+
+        `;
+
+    });
+
+}
+
+async function crearDeposito(){
+
+    const response = await fetch(
+        "http://localhost:3000/crear-deposito",
+        {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+
+                cliente:
+                document.getElementById(
+                    "clienteDeposito"
+                ).value,
+
+                monto:
+                document.getElementById(
+                    "montoDeposito"
+                ).value,
+
+                banco:
+                document.getElementById(
+                    "bancoDeposito"
+                ).value,
+
+                referencia:
+                document.getElementById(
+                    "referenciaDeposito"
+                ).value
+
+            })
+        }
+    );
+
+    const data =
+        await response.json();
+
+    alert(data.mensaje);
+
+    cargarDepositos();
+
+}
+
+async function cargarDepositos(){
+
+    const response = await fetch(
+        "http://localhost:3000/depositos"
+    );
+
+    const depositos =
+        await response.json();
+
+    const tabla =
+        document.getElementById(
+            "tablaDepositos"
+        );
+
+    tabla.innerHTML = "";
+
+    depositos.forEach(d => {
+
+        tabla.innerHTML += `
+
+            <tr>
+
+                <td>
+                    ${d.cliente}
+                </td>
+
+                <td>
+                    RD$ ${d.monto}
+                </td>
+
+                <td>
+                    ${d.banco}
+                </td>
+
+                <td>
+                    ${d.referencia}
+                </td>
+
+                <td>
+                    ${d.hora}
+                </td>
+
+            </tr>
+
+        `;
+
+    });
+
+}
+
+async function guardarDolares(){
+
+    const response = await fetch(
+        "http://localhost:3000/guardar-dolares",
+        {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+
+                uno:
+                Number(
+                    document.getElementById(
+                        "usd1"
+                    ).value || 0
+                ),
+
+                dos:
+                Number(
+                    document.getElementById(
+                        "usd2"
+                    ).value || 0
+                ),
+
+                cinco:
+                Number(
+                    document.getElementById(
+                        "usd5"
+                    ).value || 0
+                ),
+
+                diez:
+                Number(
+                    document.getElementById(
+                        "usd10"
+                    ).value || 0
+                ),
+
+                veinte:
+                Number(
+                    document.getElementById(
+                        "usd20"
+                    ).value || 0
+                ),
+
+                cincuenta:
+                Number(
+                    document.getElementById(
+                        "usd50"
+                    ).value || 0
+                ),
+
+                cien:
+                Number(
+                    document.getElementById(
+                        "usd100"
+                    ).value || 0
+                ),
+
+                tasa:
+                Number(
+                    document.getElementById(
+                        "tasa"
+                    ).value || 0
+                )
+
+            })
+        }
+    );
+
+    const data =
+        await response.json();
+
+    alert(data.mensaje);
+
+    document.getElementById(
+        "totalUSD"
+    ).innerText =
+        "$" + data.totalUSD;
+
+    document.getElementById(
+        "totalDOP"
+    ).innerText =
+        "RD$ " + data.totalDOP;
+
+}
+
+async function cargarReporteFinal(){
+
+    const response = await fetch(
+        "http://localhost:3000/reporte-final"
+    );
+
+    const data =
+        await response.json();
+
+    document.getElementById(
+        "reporteVentas"
+    ).innerText =
+        "RD$ " + data.totalVentas;
+
+    document.getElementById(
+        "reporteGastos"
+    ).innerText =
+        "RD$ " + data.totalGastos;
+
+    document.getElementById(
+        "reporteDepositos"
+    ).innerText =
+        "RD$ " + data.totalDepositos;
+
+    document.getElementById(
+        "reporteDolares"
+    ).innerText =
+        "RD$ " + data.totalDolares;
+
+    document.getElementById(
+        "totalFinal"
+    ).innerText =
+        "RD$ " + data.totalFinal;
+
+}
+
+
+cargarReporteFinal();
+cargarDepositos();
+cargarGastos();
+cargarVentas();
+agregarProducto();
+cargarHistorial();
+
+</script>
+
+</body>
+</html>

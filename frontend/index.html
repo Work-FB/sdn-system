@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>SDN • Iniciar Sesión</title>
+
+<link rel="preconnect"
+href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    font-family:'Poppins',sans-serif;
+
+    height:100vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:
+
+    linear-gradient(
+        135deg,
+        #111 0%,
+        #1b1b1b 35%,
+        #2e7d32 100%
+    );
+
+    overflow:hidden;
+
+}
+
+/* FONDO */
+
+.bg-circle{
+
+    position:absolute;
+    border-radius:50%;
+    filter:blur(60px);
+    opacity:0.25;
+
+}
+
+.circle1{
+
+    width:300px;
+    height:300px;
+    background:#4caf50;
+
+    top:-100px;
+    left:-100px;
+
+}
+
+.circle2{
+
+    width:400px;
+    height:400px;
+    background:#d9b382;
+
+    bottom:-150px;
+    right:-100px;
+
+}
+
+/* LOGIN */
+
+.login-container{
+
+    position:relative;
+
+    width:420px;
+
+    background:rgba(255,255,255,0.08);
+
+    backdrop-filter:blur(20px);
+
+    border:1px solid rgba(255,255,255,0.1);
+
+    padding:40px;
+
+    border-radius:35px;
+
+    box-shadow:
+    0 20px 40px rgba(0,0,0,0.35);
+
+    animation:fadeIn 0.8s ease;
+
+}
+
+/* LOGO */
+
+.logo{
+
+    text-align:center;
+    margin-bottom:35px;
+
+}
+
+.logo h1{
+
+    color:white;
+    font-size:42px;
+    font-weight:700;
+
+}
+
+.logo span{
+
+    color:#d9b382;
+
+}
+
+.logo p{
+
+    color:#ccc;
+    margin-top:8px;
+    font-size:15px;
+
+}
+
+/* INPUTS */
+
+.input-group{
+
+    margin-bottom:20px;
+
+}
+
+.input-group label{
+
+    color:white;
+    font-size:14px;
+    margin-bottom:8px;
+    display:block;
+
+}
+
+.input-group input{
+
+    width:100%;
+
+    padding:18px;
+
+    border:none;
+
+    border-radius:18px;
+
+    background:rgba(255,255,255,0.1);
+
+    color:white;
+
+    font-size:16px;
+
+    outline:none;
+
+    transition:0.3s;
+
+}
+
+.input-group input::placeholder{
+
+    color:#ddd;
+
+}
+
+.input-group input:focus{
+
+    background:rgba(255,255,255,0.15);
+
+    transform:scale(1.02);
+
+}
+
+/* BUTTON */
+
+.login-btn{
+
+    width:100%;
+
+    padding:18px;
+
+    border:none;
+
+    border-radius:18px;
+
+    background:#2e7d32;
+
+    color:white;
+
+    font-size:18px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:0.3s;
+
+    margin-top:10px;
+
+}
+
+.login-btn:hover{
+
+    background:#388e3c;
+
+    transform:translateY(-2px);
+
+}
+
+/* FOOTER */
+
+.footer{
+
+    text-align:center;
+    margin-top:25px;
+    color:#bbb;
+    font-size:14px;
+
+}
+
+/* ANIMATION */
+
+@keyframes fadeIn{
+
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="bg-circle circle1"></div>
+<div class="bg-circle circle2"></div>
+
+<div class="login-container">
+
+    <div class="logo">
+
+        <h1>
+             SDN
+            <span>Panel</span>
+        </h1>
+
+        <p>
+            Sazón Doña Nelta
+        </p>
+
+    </div>
+
+    <div class="input-group">
+
+        <label>
+            Usuario
+        </label>
+
+        <input
+            type="text"
+            id="usuario"
+            placeholder="Ingrese su usuario"
+        >
+
+    </div>
+
+    <div class="input-group">
+
+        <label>
+            Contraseña
+        </label>
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Ingrese su contraseña"
+        >
+
+    </div>
+
+    <button
+        class="login-btn"
+        onclick="login()"
+    >
+        Entrar al Sistema
+    </button>
+
+    <div class="footer">
+
+        Sistema Administrativo SDN © 2026
+
+    </div>
+
+</div>
+
+<script>
+
+async function login(){
+
+    const usuario =
+        document.getElementById(
+            "usuario"
+        ).value;
+
+    const password =
+        document.getElementById(
+            "password"
+        ).value;
+
+    try{
+
+        const response = await fetch(
+            "http://localhost:3000/login",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    usuario,
+                    password
+                })
+            }
+        );
+
+        const data =
+            await response.json();
+
+        if(data.mensaje){
+
+            localStorage.setItem(
+                "usuario",
+                JSON.stringify(data.usuario)
+            );
+
+            const boton =
+                document.querySelector(
+                    ".login-btn"
+                );
+
+            boton.innerText =
+                "Entrando...";
+
+            boton.style.background =
+                "#4caf50";
+
+            setTimeout(() => {
+
+                window.location.href =
+                    "dashboard.html";
+
+            },1000);
+
+        }else{
+
+            alert(data.error);
+
+        }
+
+    }catch(error){
+
+        alert(
+            "Error conectando con el servidor"
+        );
+
+        console.log(error);
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

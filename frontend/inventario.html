@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Inventario - SDN</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Poppins',sans-serif;
+    background:#f5f1e8;
+    display:flex;
+    height:100vh;
+    overflow:hidden;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    width:280px;
+    background:#111;
+    color:white;
+    padding:25px;
+    display:flex;
+    flex-direction:column;
+    border-right:4px solid #2e7d32;
+}
+
+.logo{
+    font-size:34px;
+    font-weight:700;
+    color:#d9b382;
+    margin-bottom:40px;
+}
+
+.logo span{
+    color:#2e7d32;
+}
+
+.nav{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.nav-btn{
+    background:transparent;
+    border:none;
+    color:white;
+    padding:18px;
+    border-radius:16px;
+    text-align:left;
+    cursor:pointer;
+    font-size:17px;
+    transition:0.3s;
+}
+
+.nav-btn:hover{
+    background:#2e7d32;
+}
+
+.active{
+    background:#2e7d32;
+}
+
+/* CONTENT */
+
+.content{
+    flex:1;
+    overflow:auto;
+    padding:30px;
+}
+
+/* TOP */
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.topbar h1{
+    font-size:38px;
+}
+
+.clock{
+    background:white;
+    padding:15px 25px;
+    border-radius:18px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+}
+
+/* STATS */
+
+.stats{
+    display:grid;
+    grid-template-columns:
+    repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    margin-bottom:30px;
+}
+
+.stat-card{
+    background:white;
+    border-radius:24px;
+    padding:25px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+.stat-card h2{
+    font-size:38px;
+    color:#2e7d32;
+}
+
+.stat-card p{
+    margin-top:10px;
+    color:#555;
+}
+
+/* FORM */
+
+.form-card{
+    background:white;
+    padding:25px;
+    border-radius:28px;
+    margin-bottom:30px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+.form{
+    display:grid;
+    grid-template-columns:
+    repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+}
+
+select,
+input{
+    border:none;
+    background:#f3f3f3;
+    padding:18px;
+    border-radius:16px;
+    outline:none;
+    font-size:16px;
+}
+
+.add-btn{
+    border:none;
+    background:#2e7d32;
+    color:white;
+    border-radius:16px;
+    padding:18px;
+    font-size:16px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+/* TABLA */
+
+.table-container{
+    background:white;
+    border-radius:28px;
+    overflow:hidden;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#111;
+    color:white;
+    padding:20px;
+    text-align:left;
+}
+
+td{
+    padding:18px;
+    border-bottom:1px solid #eee;
+}
+
+tr:hover{
+    background:#f9f9f9;
+}
+
+.entrada{
+    color:#2e7d32;
+    font-weight:700;
+}
+
+.salida{
+    color:#c62828;
+    font-weight:700;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+    <div class="logo">
+        📊 SDN
+        <span>Inventario</span>
+    </div>
+
+    <div class="nav">
+
+        <button
+            class="nav-btn"
+            onclick="window.location.href='dashboard.html'"
+        >
+            🏠 Inicio
+        </button>
+
+        <button
+            class="nav-btn"
+            onclick="window.location.href='menus.html'"
+        >
+            🍽️ Menús
+        </button>
+
+        <button
+            class="nav-btn"
+            onclick="window.location.href='productos.html'"
+        >
+            📦 Productos
+        </button>
+
+        <button class="nav-btn active">
+            📊 Inventario
+        </button>
+
+        <button
+            class="nav-btn"
+            onclick="window.location.href='asistencia.html'"
+        >
+            ⏰ Asistencia
+        </button>
+
+    </div>
+
+</div>
+
+<!-- CONTENT -->
+
+<div class="content">
+
+    <div class="topbar">
+
+        <h1>
+            📊 Control de Inventario
+        </h1>
+
+        <div class="clock" id="clock"></div>
+
+    </div>
+
+    <!-- STATS -->
+
+    <div class="stats">
+
+        <div class="stat-card">
+
+            <h2 id="totalMovimientos">
+                0
+            </h2>
+
+            <p>
+                Movimientos
+            </p>
+
+        </div>
+
+        <div class="stat-card">
+
+            <h2 id="productosBajos">
+                0
+            </h2>
+
+            <p>
+                Stock Bajo
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- FORM -->
+
+    <div class="form-card">
+
+        <div class="form">
+
+            <select id="producto"></select>
+
+            <select id="tipo">
+
+                <option value="ENTRADA">
+                    ENTRADA
+                </option>
+
+                <option value="SALIDA">
+                    SALIDA
+                </option>
+
+            </select>
+
+            <input
+                type="number"
+                id="cantidad"
+                placeholder="Cantidad"
+            >
+
+            <input
+                type="text"
+                id="detalle"
+                placeholder="Detalle"
+            >
+
+            <button
+                class="add-btn"
+                onclick="crearMovimiento()"
+            >
+                Registrar
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- TABLA -->
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Producto</th>
+                    <th>Tipo</th>
+                    <th>Cantidad</th>
+                    <th>Detalle</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="tabla"></tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script>
+
+/* CLOCK */
+
+function actualizarHora(){
+
+    document.getElementById("clock")
+    .innerText =
+    new Date().toLocaleTimeString();
+
+}
+
+setInterval(actualizarHora,1000);
+
+actualizarHora();
+
+/* CARGAR PRODUCTOS */
+
+async function cargarProductos(){
+
+    const response = await fetch(
+        "http://localhost:3000/productos"
+    );
+
+    const productos =
+        await response.json();
+
+    const select =
+        document.getElementById("producto");
+
+    select.innerHTML = "";
+
+    let bajos = 0;
+
+    productos.forEach(prod => {
+
+        if(prod.stock <= 10){
+
+            bajos++;
+
+        }
+
+        select.innerHTML += `
+
+            <option value="${prod.id}">
+                ${prod.nombre}
+            </option>
+
+        `;
+
+    });
+
+    document.getElementById(
+        "productosBajos"
+    ).innerText = bajos;
+
+}
+
+/* CREAR MOVIMIENTO */
+
+async function crearMovimiento(){
+
+    const response = await fetch(
+        "http://localhost:3000/crear-movimiento",
+        {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+
+                producto_id:
+                document.getElementById(
+                    "producto"
+                ).value,
+
+                tipo:
+                document.getElementById(
+                    "tipo"
+                ).value,
+
+                cantidad:
+                document.getElementById(
+                    "cantidad"
+                ).value,
+
+                detalle:
+                document.getElementById(
+                    "detalle"
+                ).value
+
+            })
+        }
+    );
+
+    const data =
+        await response.json();
+
+    alert(
+        data.mensaje +
+        "\nNuevo stock: " +
+        data.stock
+    );
+
+    cargarMovimientos();
+    cargarProductos();
+
+}
+
+/* CARGAR MOVIMIENTOS */
+
+async function cargarMovimientos(){
+
+    const response = await fetch(
+        "http://localhost:3000/movimientos"
+    );
+
+    const movimientos =
+        await response.json();
+
+    const tabla =
+        document.getElementById("tabla");
+
+    tabla.innerHTML = "";
+
+    document.getElementById(
+        "totalMovimientos"
+    ).innerText =
+        movimientos.length;
+
+    movimientos.forEach(mov => {
+
+        tabla.innerHTML += `
+
+            <tr>
+
+                <td>
+                    ${mov.nombre}
+                </td>
+
+                <td class="
+                    ${mov.tipo === "ENTRADA"
+                    ? "entrada"
+                    : "salida"}
+                ">
+
+                    ${mov.tipo}
+
+                </td>
+
+                <td>
+                    ${mov.cantidad}
+                </td>
+
+                <td>
+                    ${mov.detalle}
+                </td>
+
+                <td>
+                    ${mov.fecha}
+                </td>
+
+                <td>
+                    ${mov.hora}
+                </td>
+
+            </tr>
+
+        `;
+
+    });
+
+}
+
+cargarProductos();
+cargarMovimientos();
+
+</script>
+
+</body>
+</html>

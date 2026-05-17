@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Sazón Doña Nelta - Asistencia</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Poppins',sans-serif;
+    background:#f5f1e8;
+    display:flex;
+    height:100vh;
+    overflow:hidden;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    width:280px;
+    background:#111;
+    color:white;
+    padding:25px;
+    display:flex;
+    flex-direction:column;
+    border-right:4px solid #2e7d32;
+    box-shadow:5px 0 20px rgba(0,0,0,0.2);
+}
+
+.logo{
+    font-size:34px;
+    font-weight:700;
+    color:#d9b382;
+    margin-bottom:40px;
+    line-height:1.1;
+}
+
+.logo span{
+    color:#2e7d32;
+}
+
+.nav{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.nav-btn{
+    background:transparent;
+    border:none;
+    color:white;
+    padding:18px;
+    border-radius:16px;
+    text-align:left;
+    cursor:pointer;
+    font-size:17px;
+    transition:0.3s;
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.nav-btn:hover{
+    background:#2e7d32;
+    transform:translateX(5px);
+}
+
+.active{
+    background:#2e7d32;
+    box-shadow:0 0 15px rgba(46,125,50,0.5);
+}
+
+/* CONTENT */
+
+.content{
+    flex:1;
+    overflow:auto;
+    padding:30px;
+}
+
+/* TOPBAR */
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.topbar h1{
+    font-size:38px;
+    color:#111;
+}
+
+.clock{
+    background:white;
+    padding:15px 25px;
+    border-radius:18px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+    font-size:18px;
+    font-weight:600;
+}
+
+/* EMPLEADOS */
+
+.empleados{
+    display:grid;
+    grid-template-columns:
+    repeat(auto-fit,minmax(240px,1fr));
+    gap:25px;
+}
+
+/* CARD */
+
+.empleado-card{
+    background:white;
+    border-radius:28px;
+    overflow:hidden;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+    transition:0.3s;
+    cursor:pointer;
+}
+
+.empleado-card:hover{
+    transform:translateY(-8px);
+}
+
+.card-top{
+    height:130px;
+    background:
+    linear-gradient(
+        135deg,
+        #2e7d32,
+        #43a047
+    );
+    position:relative;
+}
+
+.avatar{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:white;
+    position:absolute;
+    bottom:-45px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:40px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+.card-content{
+    padding:60px 20px 25px;
+    text-align:center;
+}
+
+.card-content h3{
+    font-size:24px;
+    color:#111;
+}
+
+/* PANEL */
+
+.panel{
+    margin-top:35px;
+    background:white;
+    border-radius:30px;
+    padding:30px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+    display:none;
+}
+
+.panel h2{
+    margin-bottom:20px;
+    color:#111;
+}
+
+input{
+    width:100%;
+    border:none;
+    background:#f3f3f3;
+    padding:18px;
+    border-radius:18px;
+    font-size:16px;
+    margin-top:15px;
+    outline:none;
+}
+
+/* BUTTONS */
+
+.verify-btn{
+    width:100%;
+    border:none;
+    background:#111;
+    color:white;
+    padding:18px;
+    border-radius:18px;
+    margin-top:20px;
+    cursor:pointer;
+    font-size:17px;
+    transition:0.3s;
+}
+
+.verify-btn:hover{
+    background:#2e7d32;
+}
+
+.actions{
+    display:none;
+    gap:20px;
+    margin-top:25px;
+}
+
+.action-btn{
+    flex:1;
+    border:none;
+    padding:20px;
+    border-radius:20px;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+    transition:0.3s;
+    font-weight:600;
+}
+
+.action-btn:hover{
+    transform:scale(1.03);
+}
+
+.entrada{
+    background:#2e7d32;
+}
+
+.salida{
+    background:#c62828;
+}
+
+/* ALERTA */
+
+.toast{
+    position:fixed;
+    top:30px;
+    right:30px;
+    background:white;
+    padding:20px 25px;
+    border-radius:22px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.15);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    min-width:300px;
+    z-index:999;
+    animation:slideIn 0.4s ease;
+}
+
+.toast-title{
+    font-size:18px;
+    font-weight:700;
+}
+
+.toast-time{
+    color:#555;
+}
+
+.toast.success{
+    border-left:8px solid #2e7d32;
+}
+
+.toast.error{
+    border-left:8px solid #c62828;
+}
+
+@keyframes slideIn{
+
+    from{
+        transform:translateX(100%);
+        opacity:0;
+    }
+
+    to{
+        transform:translateX(0);
+        opacity:1;
+    }
+
+}
+
+/* SCROLL */
+
+::-webkit-scrollbar{
+    width:10px;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#2e7d32;
+    border-radius:20px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+    <div class="logo">
+         Sazón<br>
+        <span>Doña Nelta</span>
+    </div>
+
+    <div class="nav">
+
+        <button
+            class="nav-btn"
+            onclick="window.location.href='dashboard.html'"
+        >
+            🏠 Inicio
+        </button>
+
+        <button
+            class="nav-btn"
+            onclick="window.location.href='menus.html'"
+        >
+            🍽️ Menús
+        </button>
+
+        <button
+            class="nav-btn"
+            onclick="window.location.href='cuadre.html'"
+        >
+            💰 Control de Ventas
+        </button>
+
+        <button class="nav-btn" onclick="window.location.href='inventario.html'">
+            📦 Inventario
+        </button>
+
+        <button class="nav-btn" onclick="window.location.href='productos.html'">
+            🛒 Productos
+        </button>
+
+        <button class="nav-btn">
+            👥 Empleados
+        </button>
+
+        <button class="nav-btn active">
+            ⏰ Asistencia
+        </button>
+
+    </div>
+
+</div>
+
+<!-- CONTENT -->
+
+<div class="content">
+
+    <!-- TOPBAR -->
+
+    <div class="topbar">
+
+        <h1>
+            ⏰ Asistencia de Empleados
+        </h1>
+
+        <div class="clock" id="clock"></div>
+
+    </div>
+
+    <!-- EMPLEADOS -->
+
+    <div
+        class="empleados"
+        id="empleados"
+    ></div>
+
+    <!-- PANEL -->
+
+    <div class="panel" id="panel">
+
+        <h2 id="empleadoNombre"></h2>
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Contraseña"
+        >
+
+        <button
+            class="verify-btn"
+            onclick="verificar()"
+        >
+            Verificar Acceso
+        </button>
+
+        <div class="actions" id="actions">
+
+            <button
+                class="action-btn entrada"
+                onclick="registrar('Entrada')"
+            >
+                ✅ Entrada
+            </button>
+
+            <button
+                class="action-btn salida"
+                onclick="registrar('Salida')"
+            >
+                🚪 Salida
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+let empleadoSeleccionado = null;
+
+/* CLOCK */
+
+function actualizarHora(){
+
+    const ahora = new Date();
+
+    document.getElementById("clock")
+    .innerText =
+        ahora.toLocaleTimeString();
+
+}
+
+setInterval(actualizarHora,1000);
+
+actualizarHora();
+
+/* TOAST */
+
+function mostrarToast(
+    titulo,
+    mensaje,
+    tipo="success"
+){
+
+    const toast =
+        document.createElement("div");
+
+    toast.className =
+        `toast ${tipo}`;
+
+    toast.innerHTML = `
+
+        <div class="toast-title">
+            ${titulo}
+        </div>
+
+        <div class="toast-time">
+            ${mensaje}
+        </div>
+
+    `;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+
+        toast.remove();
+
+    },4000);
+
+}
+
+/* EMPLEADOS */
+
+async function cargarEmpleados(){
+
+    const response = await fetch(
+        "http://localhost:3000/empleados"
+    );
+
+    const empleados =
+        await response.json();
+
+    const contenedor =
+        document.getElementById("empleados");
+
+    contenedor.innerHTML = "";
+
+    empleados.forEach(emp => {
+
+        contenedor.innerHTML += `
+
+            <div
+                class="empleado-card"
+                onclick='seleccionarEmpleado(
+                    ${JSON.stringify(emp)}
+                )'
+            >
+
+                <div class="card-top">
+
+                    <div class="avatar">
+                        👤
+                    </div>
+
+                </div>
+
+                <div class="card-content">
+
+                    <h3>
+                        ${emp.nombre}
+                    </h3>
+
+                </div>
+
+            </div>
+
+        `;
+
+    });
+
+}
+
+/* SELECCIONAR */
+
+function seleccionarEmpleado(emp){
+
+    empleadoSeleccionado = emp;
+
+    document.getElementById(
+        "panel"
+    ).style.display = "block";
+
+    document.getElementById(
+        "empleadoNombre"
+    ).innerText = emp.nombre;
+
+}
+
+/* VERIFICAR */
+
+async function verificar(){
+
+    const password =
+        document.getElementById(
+            "password"
+        ).value;
+
+    try{
+
+        const response = await fetch(
+            "http://localhost:3000/verificar-empleado",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    id:empleadoSeleccionado.id,
+                    password
+                })
+            }
+        );
+
+        const data =
+            await response.json();
+
+        if(data.mensaje){
+
+            mostrarToast(
+                "✅ Acceso Permitido",
+                empleadoSeleccionado.nombre
+            );
+
+            document.getElementById(
+                "actions"
+            ).style.display = "flex";
+
+        }else{
+
+            mostrarToast(
+                "❌ Error",
+                data.error,
+                "error"
+            );
+
+        }
+
+    }catch(error){
+
+        console.log(error);
+
+    }
+
+}
+
+/* REGISTRAR */
+
+async function registrar(tipo){
+
+    const response = await fetch(
+        "http://localhost:3000/asistencia",
+        {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                usuario_id:
+                    empleadoSeleccionado.id,
+                tipo
+            })
+        }
+    );
+
+    const data =
+        await response.json();
+
+    if(tipo === "Entrada"){
+
+        mostrarToast(
+            "✅ Entrada Registrada",
+            `🕒 ${data.hora}`
+        );
+
+    }else{
+
+        mostrarToast(
+            "🚪 Salida Registrada",
+            `🕒 ${data.hora}`
+        );
+
+    }
+
+}
+
+cargarEmpleados();
+
+</script>
+
+</body>
+</html>

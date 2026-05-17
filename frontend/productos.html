@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Productos - SDN</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Poppins',sans-serif;
+    background:#f5f1e8;
+    display:flex;
+    height:100vh;
+    overflow:hidden;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    width:280px;
+    background:#111;
+    color:white;
+    padding:25px;
+    display:flex;
+    flex-direction:column;
+    border-right:4px solid #2e7d32;
+}
+
+.logo{
+    font-size:34px;
+    font-weight:700;
+    color:#d9b382;
+    margin-bottom:40px;
+}
+
+.logo span{
+    color:#2e7d32;
+}
+
+.nav{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.nav-btn{
+    background:transparent;
+    border:none;
+    color:white;
+    padding:18px;
+    border-radius:16px;
+    text-align:left;
+    cursor:pointer;
+    font-size:17px;
+    transition:0.3s;
+}
+
+.nav-btn:hover{
+    background:#2e7d32;
+}
+
+.active{
+    background:#2e7d32;
+}
+
+/* CONTENT */
+
+.content{
+    flex:1;
+    overflow:auto;
+    padding:30px;
+}
+
+/* TOP */
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.topbar h1{
+    font-size:38px;
+}
+
+.clock{
+    background:white;
+    padding:15px 25px;
+    border-radius:18px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+}
+
+/* FORM */
+
+.form-card{
+    background:white;
+    padding:25px;
+    border-radius:28px;
+    margin-bottom:30px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+.form{
+    display:grid;
+    grid-template-columns:
+    repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+}
+
+input{
+    border:none;
+    background:#f3f3f3;
+    padding:18px;
+    border-radius:16px;
+    outline:none;
+    font-size:16px;
+}
+
+.upload-btn{
+
+    background:#111;
+    color:white;
+
+    border-radius:16px;
+
+    padding:18px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    cursor:pointer;
+
+    font-size:16px;
+    font-weight:600;
+
+    transition:0.3s;
+
+}
+
+.upload-btn:hover{
+
+    background:#2e7d32;
+
+}
+
+.add-btn{
+    border:none;
+    background:#2e7d32;
+    color:white;
+    border-radius:16px;
+    padding:18px;
+    font-size:16px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+/* PRODUCTOS */
+
+.productos{
+    display:grid;
+    grid-template-columns:
+    repeat(auto-fit,minmax(280px,1fr));
+    gap:25px;
+}
+
+.producto-card{
+    background:white;
+    border-radius:28px;
+    overflow:hidden;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+    transition:0.3s;
+}
+
+.producto-card:hover{
+    transform:translateY(-8px);
+}
+
+.producto-img{
+    height:200px;
+    background-size:cover;
+    background-position:center;
+}
+
+.producto-content{
+    padding:22px;
+}
+
+.badge{
+    display:inline-block;
+    padding:8px 16px;
+    border-radius:50px;
+    font-size:14px;
+    margin-bottom:15px;
+    color:white;
+}
+
+.stock-alto{
+    background:#2e7d32;
+}
+
+.stock-medio{
+    background:#f9a825;
+}
+
+.stock-bajo{
+    background:#c62828;
+}
+
+.producto-content h3{
+    font-size:25px;
+    margin-bottom:10px;
+}
+
+.info{
+    margin-top:10px;
+    color:#555;
+}
+
+.costo{
+    margin-top:20px;
+    font-size:30px;
+    color:#2e7d32;
+    font-weight:700;
+}
+
+.delete-btn{
+    width:100%;
+    border:none;
+    background:#c62828;
+    color:white;
+    padding:16px;
+    border-radius:14px;
+    margin-top:20px;
+    cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+        <div class="logo">
+         SDN<br>
+        <span>Productos</span>
+    </div>
+
+    <div class="nav">
+
+        <button
+            class="nav-btn"
+            onclick="window.location.href='dashboard.html'"
+        >
+            🏠 Inicio
+        </button>
+
+        <button class="nav-btn">
+            🍽️ Menús
+        </button>
+
+        <button
+            class="nav-btn"
+            onclick="window.location.href='cuadre.html'"
+        >
+            💰 Control de Ventas
+        </button>
+
+        <button class="nav-btn" onclick="window.location.href='inventario.html'">
+            📦 Inventario
+        </button>
+
+        <button class="nav-btn active" onclick="window.location.href='productos.html'">
+            🛒 Productos
+        </button>
+
+        <button class="nav-btn">
+            👥 Empleados
+        </button>
+
+        <button
+            class="nav-btn"
+            onclick="window.location.href='asistencia.html'"
+        >
+            ⏰ Asistencia
+        </button>
+
+    </div>
+
+</div>
+
+<!-- CONTENT -->
+
+<div class="content">
+
+    <div class="topbar">
+
+        <h1>
+            📦 Gestión de Productos
+        </h1>
+
+        <div class="clock" id="clock"></div>
+
+    </div>
+
+    <!-- FORM -->
+
+    <div class="form-card">
+
+        <div class="form">
+
+            <input
+                type="text"
+                id="nombre"
+                placeholder="Nombre"
+            >
+
+            <input
+                type="text"
+                id="categoria"
+                placeholder="Categoría"
+            >
+
+            <input
+                type="number"
+                id="stock"
+                placeholder="Stock"
+            >
+
+            <input
+                type="number"
+                id="costo"
+                placeholder="Costo"
+            >
+
+            <input
+                type="text"
+                id="suplidor"
+                placeholder="Suplidor"
+            >
+
+            <label class="upload-btn">
+
+                ➕ Imagen
+
+                <input
+                    type="file"
+                    id="imagen"
+                    hidden
+                >
+
+            </label>
+
+            <button
+                class="add-btn"
+                onclick="crearProducto()"
+            >
+                Agregar
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- PRODUCTOS -->
+
+    <div
+        class="productos"
+        id="productos"
+    ></div>
+
+</div>
+
+<script>
+
+/* CLOCK */
+
+function actualizarHora(){
+
+    const ahora = new Date();
+
+    document.getElementById("clock")
+    .innerText =
+        ahora.toLocaleTimeString();
+
+}
+
+setInterval(actualizarHora,1000);
+
+actualizarHora();
+
+/* CREAR */
+
+async function crearProducto(){
+
+    const formData = new FormData();
+
+    formData.append(
+        "nombre",
+        document.getElementById("nombre").value
+    );
+
+    formData.append(
+        "categoria",
+        document.getElementById("categoria").value
+    );
+
+    formData.append(
+        "stock",
+        document.getElementById("stock").value
+    );
+
+    formData.append(
+        "costo",
+        document.getElementById("costo").value
+    );
+
+    formData.append(
+        "suplidor",
+        document.getElementById("suplidor").value
+    );
+
+    const imagen =
+        document.getElementById("imagen").files[0];
+
+    if(imagen){
+
+        formData.append(
+            "imagen",
+            imagen
+        );
+
+    }
+
+    const response = await fetch(
+        "http://localhost:3000/crear-producto",
+        {
+            method:"POST",
+            body:formData
+        }
+    );
+
+    const data = await response.json();
+
+    alert(data.mensaje);
+
+    cargarProductos();
+
+}
+
+/* CARGAR */
+
+async function cargarProductos(){
+
+    const response = await fetch(
+        "http://localhost:3000/productos"
+    );
+
+    const productos =
+        await response.json();
+
+    const contenedor =
+        document.getElementById("productos");
+
+    contenedor.innerHTML = "";
+
+    productos.forEach(prod => {
+
+        let claseStock = "stock-alto";
+
+        if(prod.stock <= 10){
+
+            claseStock = "stock-bajo";
+
+        }else if(prod.stock <= 30){
+
+            claseStock = "stock-medio";
+
+        }
+
+        contenedor.innerHTML += `
+
+            <div class="producto-card">
+
+                <div
+                    class="producto-img"
+                    style="
+                        background-image:url(
+                        'http://localhost:3000/uploads/${prod.imagen}'
+                        )
+                    "
+                ></div>
+
+                <div class="producto-content">
+
+                    <div class="badge ${claseStock}">
+                        Stock: ${prod.stock}
+                    </div>
+
+                    <h3>
+                        ${prod.nombre}
+                    </h3>
+
+                    <div class="info">
+                        📦 ${prod.categoria}
+                    </div>
+
+                    <div class="info">
+                        🚚 ${prod.suplidor}
+                    </div>
+
+                    <div class="costo">
+                        RD$ ${prod.costo}
+                    </div>
+
+                    <button
+                        class="delete-btn"
+                        onclick="eliminarProducto(${prod.id})"
+                    >
+                        Eliminar
+                    </button>
+
+                </div>
+
+            </div>
+
+        `;
+
+    });
+
+}
+
+/* ELIMINAR */
+
+async function eliminarProducto(id){
+
+    if(!confirm(
+        "Eliminar producto?"
+    )) return;
+
+    const response = await fetch(
+        `http://localhost:3000/eliminar-producto/${id}`,
+        {
+            method:"DELETE"
+        }
+    );
+
+    const data = await response.json();
+
+    alert(data.mensaje);
+
+    cargarProductos();
+
+}
+
+cargarProductos();
+
+</script>
+
+</body>
+</html>

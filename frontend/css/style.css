@@ -1,0 +1,184 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#e9e1d4;
+    overflow:hidden;
+}
+
+.container{
+    display:flex;
+    width:100vw;
+    height:100vh;
+}
+
+.sidebar{
+    width:280px;
+    background:#111111;
+    color:white;
+    padding:25px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+
+.logo-area h1{
+    color:#4caf50;
+    font-size:38px;
+    font-weight:bold;
+}
+
+.logo-area span{
+    color:#d8c3a5;
+    font-size:22px;
+}
+
+nav{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+    margin-top:40px;
+}
+
+.menu-btn{
+    background:#1b1b1b;
+    border:none;
+    color:white;
+    padding:18px;
+    border-radius:18px;
+    font-size:20px;
+    text-align:left;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.menu-btn:hover{
+    background:#4caf50;
+    transform:translateX(5px);
+}
+
+.active{
+    background:#4caf50;
+}
+
+.main-content{
+    flex:1;
+    padding:30px;
+    overflow:auto;
+}
+
+header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:35px;
+}
+
+header h2{
+    font-size:42px;
+    color:#111;
+}
+
+header p{
+    margin-top:5px;
+    color:#555;
+    font-size:18px;
+}
+
+.user-box{
+    background:white;
+    padding:18px 25px;
+    border-radius:15px;
+    font-size:20px;
+    font-weight:bold;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(240px,1fr));
+    gap:25px;
+}
+
+.card{
+    background:white;
+    border-radius:25px;
+    padding:30px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.08);
+    transition:0.3s;
+    cursor:pointer;
+}
+
+.card:hover{
+    transform:translateY(-8px);
+    background:#4caf50;
+    color:white;
+}
+
+.icon{
+    font-size:50px;
+    margin-bottom:15px;
+}
+
+.card h3{
+    font-size:28px;
+    margin-bottom:10px;
+}
+
+.card p{
+    font-size:18px;
+}
+
+.stats{
+    margin-top:40px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(280px,1fr));
+    gap:25px;
+}
+
+.stat-box{
+    background:#111111;
+    color:white;
+    padding:30px;
+    border-radius:25px;
+}
+
+.stat-box h4{
+    font-size:22px;
+    margin-bottom:15px;
+    color:#d8c3a5;
+}
+
+.stat-box span{
+    font-size:42px;
+    color:#4caf50;
+    font-weight:bold;
+}
+
+@media(max-width:900px){
+
+    .sidebar{
+        width:110px;
+        padding:15px;
+    }
+
+    .logo-area h1,
+    .logo-area span{
+        display:none;
+    }
+
+    .menu-btn{
+        font-size:16px;
+        text-align:center;
+        padding:15px;
+    }
+
+    header h2{
+        font-size:30px;
+    }
+
+}

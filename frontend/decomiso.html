@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Decomiso • SDN</title>
+
+<link rel="preconnect"
+href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    font-family:'Poppins',sans-serif;
+    background:#f5f1e8;
+    display:flex;
+
+}
+
+/* SIDEBAR */
+
+.sidebar{
+
+    width:280px;
+    background:#111;
+    min-height:100vh;
+    padding:25px;
+    color:white;
+
+}
+
+.logo{
+
+    font-size:32px;
+    font-weight:700;
+    color:#d9b382;
+    margin-bottom:40px;
+
+}
+
+.logo span{
+
+    color:#2e7d32;
+
+}
+
+.nav{
+
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+
+}
+
+.nav button{
+
+    background:transparent;
+    border:none;
+    color:white;
+    padding:18px;
+    border-radius:16px;
+    text-align:left;
+    cursor:pointer;
+    transition:0.3s;
+    font-size:16px;
+
+}
+
+.nav button:hover{
+
+    background:#2e7d32;
+
+}
+
+.active{
+
+    background:#c62828 !important;
+
+}
+
+/* CONTENT */
+
+.content{
+
+    flex:1;
+    padding:30px;
+
+}
+
+.top{
+
+    margin-bottom:30px;
+
+}
+
+.top h1{
+
+    font-size:36px;
+    color:#111;
+
+}
+
+.top p{
+
+    color:#555;
+    margin-top:8px;
+
+}
+
+/* FORM */
+
+.form{
+
+    background:white;
+    padding:25px;
+    border-radius:25px;
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(220px,1fr));
+
+    gap:15px;
+
+}
+
+.form input,
+.form select{
+
+    padding:16px;
+    border:none;
+    background:#f5f5f5;
+    border-radius:14px;
+    font-size:15px;
+
+}
+
+.form button{
+
+    background:#c62828;
+    color:white;
+    border:none;
+    border-radius:14px;
+    cursor:pointer;
+    font-size:16px;
+
+}
+
+/* TABLE */
+
+.table-container{
+
+    background:white;
+    padding:25px;
+    border-radius:25px;
+    margin-top:30px;
+    overflow:auto;
+
+}
+
+table{
+
+    width:100%;
+    border-collapse:collapse;
+
+}
+
+th{
+
+    background:#111;
+    color:white;
+    padding:16px;
+
+}
+
+td{
+
+    padding:16px;
+    border-bottom:1px solid #eee;
+
+}
+
+.motivo{
+
+    background:#c62828;
+    color:white;
+    padding:8px 15px;
+    border-radius:12px;
+    display:inline-block;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+    <div class="logo">
+
+        ⚠️ SDN
+        <span>Decomiso</span>
+
+    </div>
+
+    <div class="nav">
+
+        <button onclick="window.location.href='dashboard.html'">
+            🏠 Inicio
+        </button>
+
+        <button class="active">
+            ⚠️ Decomiso
+        </button>
+
+    </div>
+
+</div>
+
+<div class="content">
+
+    <div class="top">
+
+        <h1>
+            Control de Decomiso
+        </h1>
+
+        <p>
+            Registro de pérdidas y productos dañados
+        </p>
+
+    </div>
+
+    <div class="form">
+
+        <input
+            type="text"
+            id="producto"
+            placeholder="Producto"
+        >
+
+        <input
+            type="number"
+            id="cantidad"
+            placeholder="Cantidad"
+        >
+
+        <select id="motivo">
+
+            <option value="Dañado">
+                Dañado
+            </option>
+
+            <option value="Quemado">
+                Quemado
+            </option>
+
+            <option value="No vendido">
+                No vendido
+            </option>
+
+            <option value="Error cocina">
+                Error cocina
+            </option>
+
+            <option value="Caída">
+                Caída
+            </option>
+
+        </select>
+
+        <input
+            type="text"
+            id="responsable"
+            placeholder="Responsable"
+        >
+
+        <button onclick="registrarDecomiso()">
+            Registrar
+        </button>
+
+    </div>
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Motivo</th>
+                    <th>Responsable</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="tabla"></tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script>
+
+async function registrarDecomiso(){
+
+    const response =
+        await fetch(
+            "http://localhost:3000/decomiso",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+
+                    producto:
+                    document.getElementById(
+                        "producto"
+                    ).value,
+
+                    cantidad:
+                    document.getElementById(
+                        "cantidad"
+                    ).value,
+
+                    motivo:
+                    document.getElementById(
+                        "motivo"
+                    ).value,
+
+                    responsable:
+                    document.getElementById(
+                        "responsable"
+                    ).value
+
+                })
+            }
+        );
+
+    const data =
+        await response.json();
+
+    alert(data.mensaje);
+
+    cargarDecomiso();
+
+}
+
+async function cargarDecomiso(){
+
+    const response =
+        await fetch(
+            "http://localhost:3000/decomiso"
+        );
+
+    const decomisos =
+        await response.json();
+
+    const tabla =
+        document.getElementById(
+            "tabla"
+        );
+
+    tabla.innerHTML = "";
+
+    decomisos.forEach(item => {
+
+        tabla.innerHTML += `
+
+        <tr>
+
+            <td>
+                ${item.producto}
+            </td>
+
+            <td>
+                ${item.cantidad}
+            </td>
+
+            <td>
+
+                <span class="motivo">
+
+                    ${item.motivo}
+
+                </span>
+
+            </td>
+
+            <td>
+                ${item.responsable}
+            </td>
+
+            <td>
+                ${item.fecha}
+            </td>
+
+            <td>
+                ${item.hora}
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+
+cargarDecomiso();
+
+</script>
+
+</body>
+</html>
