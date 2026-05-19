@@ -290,8 +290,24 @@ app.post("/login", async (req, res) => {
 app.post("/crear-venta", async (req, res) => {
     const { producto, cantidad, precio } = req.body;
     const total = cantidad * precio;
-    const fecha = new Date().toLocaleDateString();
-    const hora = new Date().toLocaleTimeString();
+const ahora = new Date();
+
+const fecha = ahora.toLocaleDateString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo"
+    }
+);
+
+const hora = ahora.toLocaleTimeString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    }
+);
     
     try {
         await query(
