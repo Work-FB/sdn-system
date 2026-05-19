@@ -1,12 +1,9 @@
-/*==========================================================
-    Variables principales
-============================================================*/
+require('dotenv').config();
 
 const express = require("express");
-const sqlite3 = require("sqlite3").verbose();
+const { Pool } = require("pg");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
-
 const multer = require("multer");
 const path = require("path");
 
@@ -19,1910 +16,700 @@ app.use(express.json());
 /* ===========================================================
    IMAGENES
 ==============================================================*/
-
-app.use(
-    "/uploads",
-    express.static(
-        path.join(__dirname, "uploads")
-    )
-);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, "uploads/"),
+    filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
+});
+const upload = multer({ storage });
 
-    destination: function(req, file, cb){
-
-        cb(null, "uploads/");
-
-    },
-
-    filename: function(req, file, cb){
-
-        cb(
-            null,
-            Date.now() +
-            path.extname(file.originalname)
-        );
-
-    }
-
+/* ===========================================================
+   POSTGRESQL CONNECTION
+==============================================================*/
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
 });
 
-const upload = multer({
-    storage
-});
+// Función helper para consultas
+const query = (text, params) => pool.query(text, params);
 
+// Crear todas las tablas con la estructura CORRECTA
+const initDB = async () => {
+    try {
+        // Usuarios - versión COMPLETA con todas las columnas necesarias
+        await query(`
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id SERIAL PRIMARY KEY,
+                nombre TEXT NOT NULL,
+                usuario TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                rol TEXT NOT NULL,
+                telefono TEXT,
+                salario REAL,
+                estado TEXT DEFAULT 'Activo',
+                fecha_ingreso TEXT
+            )
+        `);
 
-/*======================================================
-    BASE DE DATOS
-========================================================*/
+        await query(`
+            CREATE TABLE IF NOT EXISTS cuadres (
+                id SERIAL PRIMARY KEY,
+                fecha TEXT NOT NULL,
+                hora TEXT NOT NULL,
+                total_ventas REAL NOT NULL,
+                total_efectivo REAL NOT NULL
+            )
+        `);
 
-const db = new sqlite3.Database("./database.db", (err) => {
-    if (err) {
-        console.log("Error conectando SQLite", err.message);
+        await query(`
+            CREATE TABLE IF NOT EXISTS gastos (
+                id SERIAL PRIMARY KEY,
+                descripcion TEXT NOT NULL,
+                monto REAL NOT NULL,
+                fecha TEXT NOT NULL,
+                hora TEXT NOT NULL
+            )
+        `);
+
+        await query(`
+            CREATE TABLE IF NOT EXISTS productos_vendidos (
+                id SERIAL PRIMARY KEY,
+                cuadre_id INTEGER REFERENCES cuadres(id),
+                producto TEXT NOT NULL,
+                precio REAL NOT NULL
+            )
+        `);
+
+        await query(`
+            CREATE TABLE IF NOT EXISTS asistencia (
+                id SERIAL PRIMARY KEY,
+                usuario_id INTEGER REFERENCES usuarios(id),
+                tipo TEXT NOT NULL,
+                fecha TEXT NOT NULL,
+                hora TEXT NOT NULL
+            )
+        `);
+
+        await query(`
+            CREATE TABLE IF NOT EXISTS menus (
+                id SERIAL PRIMARY KEY,
+                nombre TEXT NOT NULL,
+                precio REAL NOT NULL,
+                categoria TEXT,
+                imagen TEXT,
+                disponible INTEGER DEFAULT 1
+            )
+        `);
+
+        await query(`
+            CREATE TABLE IF NOT EXISTS productos (
+                id SERIAL PRIMARY KEY,
+                nombre TEXT NOT NULL,
+                categoria TEXT,
+                stock INTEGER DEFAULT 0,
+                costo REAL DEFAULT 0,
+                suplidor TEXT,
+                imagen TEXT,
+                fecha TEXT
+            )
+        `);
+
+        await query(`
+            CREATE TABLE IF NOT EXISTS movimientos (
+                id SERIAL PRIMARY KEY,
+                producto_id INTEGER REFERENCES productos(id),
+                tipo TEXT NOT NULL,
+                cantidad INTEGER NOT NULL,
+                detalle TEXT,
+                fecha TEXT NOT NULL,
+                hora TEXT NOT NULL
+            )
+        `);
+
+        await query(`
+            CREATE TABLE IF NOT EXISTS ventas (
+                id SERIAL PRIMARY KEY,
+                producto TEXT NOT NULL,
+                cantidad INTEGER NOT NULL,
+                precio REAL NOT NULL,
+                total REAL NOT NULL,
+                fecha TEXT NOT NULL,
+                hora TEXT NOT NULL
+            )
+        `);
+
+        await query(`
+            CREATE TABLE IF NOT EXISTS depositos (
+                id SERIAL PRIMARY KEY,
+                cliente TEXT NOT NULL,
+                monto REAL NOT NULL,
+                banco TEXT,
+                referencia TEXT,
+                fecha TEXT NOT NULL,
+                hora TEXT NOT NULL
+            )
+        `);
+
+        await query(`
+            CREATE TABLE IF NOT EXISTS dolares (
+                id SERIAL PRIMARY KEY,
+                uno INTEGER DEFAULT 0,
+                dos INTEGER DEFAULT 0,
+                cinco INTEGER DEFAULT 0,
+                diez INTEGER DEFAULT 0,
+                veinte INTEGER DEFAULT 0,
+                cincuenta INTEGER DEFAULT 0,
+                cien INTEGER DEFAULT 0,
+                tasa REAL NOT NULL,
+                total_usd REAL NOT NULL,
+                total_dop REAL NOT NULL,
+                fecha TEXT NOT NULL,
+                hora TEXT NOT NULL
+            )
+        `);
+
+        await query(`
+            CREATE TABLE IF NOT EXISTS caja (
+                id SERIAL PRIMARY KEY,
+                fecha TEXT NOT NULL,
+                hora TEXT NOT NULL,
+                total_ventas REAL DEFAULT 0,
+                total_gastos REAL DEFAULT 0,
+                total_depositos REAL DEFAULT 0,
+                total_dolares REAL DEFAULT 0,
+                total_final REAL DEFAULT 0,
+                faltante REAL DEFAULT 0,
+                estado TEXT NOT NULL,
+                observacion TEXT
+            )
+        `);
+
+        await query(`
+            CREATE TABLE IF NOT EXISTS decomiso (
+                id SERIAL PRIMARY KEY,
+                producto TEXT NOT NULL,
+                cantidad INTEGER NOT NULL,
+                motivo TEXT NOT NULL,
+                responsable TEXT,
+                fecha TEXT NOT NULL,
+                hora TEXT NOT NULL
+            )
+        `);
+
+        console.log("✅ Tablas creadas/verificadas en PostgreSQL");
+    } catch (err) {
+        console.error("❌ Error creando tablas:", err);
     }
-    else {
-        console.log("SQLite conectado");
-    }
-});
+};
 
-/*Creación de las tablas necesarias*/
+initDB();
 
-// Usuario, para entrar al sistema
-db.run(`
-CREATE TABLE IF NOT EXISTS usuarios (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nombre TEXT NOT NULL,
-    usuario TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    rol TEXT NOT NULL
-)
-`);
-
-//Cuadres de la tabla de control de ventas
-db.run(`
-CREATE TABLE IF NOT EXISTS cuadres (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    fecha TEXT NOT NULL,
-    hora TEXT NOT NULL,
-    total_ventas REAL NOT NULL,
-    total_efectivo REAL NOT NULL
-
-)
-`);
-
-// Gastos del apartado Control de ventas
-db.run(`
-CREATE TABLE IF NOT EXISTS gastos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    descripcion TEXT NOT NULL,
-    monto REAL NOT NULL,
-    fecha TEXT NOT NULL,
-    hora TEXT NOT NULL
-
-)
-`);
-//Esta tabla es del apartado de control de ventas
-db.run(`
-CREATE TABLE IF NOT EXISTS productos_vendidos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    cuadre_id INTEGER,
-    producto TEXT NOT NULL,
-    precio REAL NOT NULL,
-
-    FOREIGN KEY(cuadre_id)
-    REFERENCES cuadres(id)
-)
-`);
-
-// Asistencia del apartado de control de asistencia
-db.run(`
-CREATE TABLE IF NOT EXISTS asistencia (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    usuario_id INTEGER NOT NULL,
-    tipo TEXT NOT NULL,
-    fecha TEXT NOT NULL,
-    hora TEXT NOT NULL,
-
-    FOREIGN KEY(usuario_id)
-    REFERENCES usuarios(id)
-)
-`);
-
-//Del apartado del menu
-db.run(`
-CREATE TABLE IF NOT EXISTS menus (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nombre TEXT NOT NULL,
-    precio REAL NOT NULL,
-    categoria TEXT,
-    imagen TEXT,
-    disponible INTEGER DEFAULT 1
-)
-`);
-
-//Del apartado de productos
-db.run(`
-CREATE TABLE IF NOT EXISTS productos (
-
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nombre TEXT NOT NULL,
-    categoria TEXT,
-    stock INTEGER DEFAULT 0,
-    costo REAL DEFAULT 0,
-    suplidor TEXT,
-    imagen TEXT,
-    fecha TEXT
-
-)
-`);
-
-//Perteneciente al espacio de Inventario
-db.run(`
-CREATE TABLE IF NOT EXISTS movimientos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    producto_id INTEGER NOT NULL,
-    tipo TEXT NOT NULL,
-    cantidad INTEGER NOT NULL,
-    detalle TEXT,
-    fecha TEXT NOT NULL,
-    hora TEXT NOT NULL,
-
-    FOREIGN KEY(producto_id)
-    REFERENCES productos(id)
-
-)
-`);
-
-//Parte del apartado de control de ventas
-db.run(`
-CREATE TABLE IF NOT EXISTS ventas (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    producto TEXT NOT NULL,
-    cantidad INTEGER NOT NULL,
-    precio REAL NOT NULL,
-    total REAL NOT NULL,
-    fecha TEXT NOT NULL,
-    hora TEXT NOT NULL
-
-)
-`);
-    
-db.run(`
-CREATE TABLE IF NOT EXISTS depositos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    cliente TEXT NOT NULL,
-    monto REAL NOT NULL,
-    banco TEXT,
-    referencia TEXT,
-    fecha TEXT NOT NULL,
-    hora TEXT NOT NULL
-
-)
-`);
-
-db.run(`
-CREATE TABLE IF NOT EXISTS dolares (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    uno INTEGER DEFAULT 0,
-    dos INTEGER DEFAULT 0,
-    cinco INTEGER DEFAULT 0,
-    diez INTEGER DEFAULT 0,
-    veinte INTEGER DEFAULT 0,
-    cincuenta INTEGER DEFAULT 0,
-    cien INTEGER DEFAULT 0,
-    tasa REAL NOT NULL,
-    total_usd REAL NOT NULL,
-    total_dop REAL NOT NULL,
-    fecha TEXT NOT NULL,
-    hora TEXT NOT NULL
-
-)
-`);
-
-//Caja
-db.run(`
-CREATE TABLE IF NOT EXISTS caja (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    fecha TEXT NOT NULL,
-    hora TEXT NOT NULL,
-    total_ventas REAL DEFAULT 0,
-    total_gastos REAL DEFAULT 0,
-    total_depositos REAL DEFAULT 0,
-    total_dolares REAL DEFAULT 0,
-    total_final REAL DEFAULT 0,
-    faltante REAL DEFAULT 0,
-    estado TEXT NOT NULL,
-    observacion TEXT
-
-)
-`);
-
-//Decomiso
-db.run(`
-CREATE TABLE IF NOT EXISTS decomiso (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    producto TEXT NOT NULL,
-    cantidad INTEGER NOT NULL,
-    motivo TEXT NOT NULL,
-    responsable TEXT,
-    fecha TEXT NOT NULL,
-    hora TEXT NOT NULL
-
-)
-`);
 /* =========================
    REGISTRO
 ========================= */
-
 app.post("/register", async (req, res) => {
-
     const { nombre, usuario, password, rol } = req.body;
-
     try {
-
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        db.run(
-            `
-            INSERT INTO usuarios(nombre, usuario, password, rol)
-            VALUES (?, ?, ?, ?)
-            `,
-            [nombre, usuario, hashedPassword, rol],
-            function(err) {
-
-                if (err) {
-                    return res.status(400).json({
-                        error: err.message
-                    });
-                }
-
-                res.json({
-                    mensaje: "Usuario registrado",
-                    id: this.lastID
-                });
-
-            }
+        const result = await query(
+            `INSERT INTO usuarios(nombre, usuario, password, rol) VALUES ($1, $2, $3, $4) RETURNING id`,
+            [nombre, usuario, hashedPassword, rol]
         );
-
+        res.json({ mensaje: "Usuario registrado", id: result.rows[0].id });
     } catch (error) {
-
-        res.status(500).json({
-            error: error.message
-        });
-
+        res.status(400).json({ error: error.message });
     }
-
 });
 
-/*=============================
-    Registro de empleados
-===============================*/
+/* =========================
+   CREAR EMPLEADO (CORREGIDO)
+========================= */
 app.post("/crear-empleado", async (req, res) => {
-
-    const {
-
-        nombre,
-        usuario,
-        password,
-        rol,
-        telefono,
-        salario
-
-    } = req.body;
-
-    try{
-
-        const hashedPassword =
-            await bcrypt.hash(password, 10);
-
-        const fechaIngreso =
-            new Date().toLocaleDateString();
-
-        db.run(
-            `
-            INSERT INTO usuarios(
-
-                nombre,
-                usuario,
-                password,
-                rol,
-                telefono,
-                salario,
-                estado,
-                fecha_ingreso
-
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            `,
-            [
-
-                nombre,
-                usuario,
-                hashedPassword,
-                rol,
-                telefono,
-                salario,
-                "Activo",
-                fechaIngreso
-
-            ],
-            function(err){
-
-                if(err){
-
-                    return res.status(500).json({
-                        error: err.message
-                    });
-
-                }
-
-                res.json({
-                    mensaje:
-                    "Empleado creado"
-                });
-
-            }
+    const { nombre, usuario, password, rol, telefono, salario } = req.body;
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const fechaIngreso = new Date().toLocaleDateString();
+        
+        await query(
+            `INSERT INTO usuarios(nombre, usuario, password, rol, telefono, salario, estado, fecha_ingreso)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+            [nombre, usuario, hashedPassword, rol, telefono || null, salario || 0, "Activo", fechaIngreso]
         );
-
-    }catch(error){
-
-        res.status(500).json({
-            error:error.message
-        });
-
+        res.json({ mensaje: "Empleado creado" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-
 });
 
-app.get("/empleados-completo", (req, res) => {
-
-    db.all(
-        `
-        SELECT *
-        FROM usuarios
-        ORDER BY id DESC
-        `,
-        [],
-        (err, rows) => {
-
-            if(err){
-
-                return res.status(500).json({
-                    error: err.message
-                });
-
-            }
-
-            res.json(rows);
-
-        }
-    );
-
+app.get("/empleados-completo", async (req, res) => {
+    try {
+        const result = await query(`SELECT * FROM usuarios ORDER BY id DESC`);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
-app.delete("/eliminar-empleado/:id", (req, res) => {
-
+app.delete("/eliminar-empleado/:id", async (req, res) => {
     const { id } = req.params;
-
-    db.run(
-        `
-        DELETE FROM usuarios
-        WHERE id = ?
-        `,
-        [id],
-        function(err){
-
-            if(err){
-
-                return res.status(500).json({
-                    error: err.message
-                });
-
-            }
-
-            res.json({
-                mensaje:
-                "Empleado eliminado"
-            });
-
-        }
-    );
-
+    try {
+        await query(`DELETE FROM usuarios WHERE id = $1`, [id]);
+        res.json({ mensaje: "Empleado eliminado" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 /* =========================
    LOGIN
 ========================= */
-
-app.post("/login", (req, res) => {
-
+app.post("/login", async (req, res) => {
     const { usuario, password } = req.body;
-
-    db.get(
-        `
-        SELECT * FROM usuarios
-        WHERE usuario = ?
-        `,
-        [usuario],
-        async (err, user) => {
-
-            if (err) {
-                return res.status(500).json({
-                    error: err.message
-                });
-            }
-
-            if (!user) {
-                return res.status(404).json({
-                    error: "Usuario no encontrado"
-                });
-            }
-
-            const validPassword = await bcrypt.compare(
-                password,
-                user.password
-            );
-
-            if (!validPassword) {
-                return res.status(401).json({
-                    error: "Contraseña incorrecta"
-                });
-            }
-
-            res.json({
-                mensaje: "Login correcto",
-                usuario: {
-                    id: user.id,
-                    nombre: user.nombre,
-                    rol: user.rol
-                }
-            });
-
-        }
-    );
-
-});
-
-/*===========================================================================
-    Apartado de control de ventas
-=============================================================================*/
-
-app.post("/crear-venta", (req, res) => {
-
-    const {
-        producto,
-        cantidad,
-        precio
-    } = req.body;
-
-    const total =
-        cantidad * precio;
-
-    const fecha =
-        new Date().toLocaleDateString();
-
-    const hora =
-        new Date().toLocaleTimeString();
-
-    db.run(
-        `
-        INSERT INTO ventas(
-            producto,
-            cantidad,
-            precio,
-            total,
-            fecha,
-            hora
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-        `,
-        [
-            producto,
-            cantidad,
-            precio,
-            total,
-            fecha,
-            hora
-        ],
-        function(err){
-
-            if(err){
-
-                return res.status(500).json({
-                    error: err.message
-                });
-
-            }
-
-            res.json({
-                mensaje:"Venta registrada",
-                total
-            });
-
-        }
-    );
-
-});
-
-app.get("/ventas", (req, res) => {
-
-    db.all(
-        `
-        SELECT *
-        FROM ventas
-        ORDER BY id DESC
-        `,
-        [],
-        (err, rows) => {
-
-            if(err){
-
-                return res.status(500).json({
-                    error: err.message
-                });
-
-            }
-
-            res.json(rows);
-
-        }
-    );
-
-});
-
-
-app.post("/crear-gasto", (req, res) => {
-
-    const {
-        descripcion,
-        monto
-    } = req.body;
-
-    const fecha =
-        new Date().toLocaleDateString();
-
-    const hora =
-        new Date().toLocaleTimeString();
-
-    db.run(
-        `
-        INSERT INTO gastos(
-            descripcion,
-            monto,
-            fecha,
-            hora
-        )
-        VALUES (?, ?, ?, ?)
-        `,
-        [
-            descripcion,
-            monto,
-            fecha,
-            hora
-        ],
-        function(err){
-
-            if(err){
-
-                return res.status(500).json({
-                    error: err.message
-                });
-
-            }
-
-            res.json({
-                mensaje:"Gasto registrado"
-            });
-
-        }
-    );
-
-});
-
-app.get("/gastos", (req, res) => {
-
-    db.all(
-        `
-        SELECT *
-        FROM gastos
-        ORDER BY id DESC
-        `,
-        [],
-        (err, rows) => {
-
-            if(err){
-
-                return res.status(500).json({
-                    error: err.message
-                });
-
-            }
-
-            res.json(rows);
-
-        }
-    );
-
-});
-
-app.post("/crear-deposito", (req, res) => {
-
-    const {
-        cliente,
-        monto,
-        banco,
-        referencia
-    } = req.body;
-
-    const fecha =
-        new Date().toLocaleDateString();
-
-    const hora =
-        new Date().toLocaleTimeString();
-
-    db.run(
-        `
-        INSERT INTO depositos(
-            cliente,
-            monto,
-            banco,
-            referencia,
-            fecha,
-            hora
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-        `,
-        [
-            cliente,
-            monto,
-            banco,
-            referencia,
-            fecha,
-            hora
-        ],
-        function(err){
-
-            if(err){
-
-                return res.status(500).json({
-                    error: err.message
-                });
-
-            }
-
-            res.json({
-                mensaje:"Depósito registrado"
-            });
-
-        }
-    );
-
-});
-
-app.get("/depositos", (req, res) => {
-
-    db.all(
-        `
-        SELECT *
-        FROM depositos
-        ORDER BY id DESC
-        `,
-        [],
-        (err, rows) => {
-
-            if(err){
-
-                return res.status(500).json({
-                    error: err.message
-                });
-
-            }
-
-            res.json(rows);
-
-        }
-    );
-
-});
-
-//-------------------------------------------------
-
-app.post("/guardar-dolares", (req, res) => {
-
-    const {
-        uno,
-        dos,
-        cinco,
-        diez,
-        veinte,
-        cincuenta,
-        cien,
-        tasa
-    } = req.body;
-
-    const totalUSD =
-
-        (uno * 1) +
-        (dos * 2) +
-        (cinco * 5) +
-        (diez * 10) +
-        (veinte * 20) +
-        (cincuenta * 50) +
-        (cien * 100);
-
-    const totalDOP =
-        totalUSD * tasa;
-
-    const fecha =
-        new Date().toLocaleDateString();
-
-    const hora =
-        new Date().toLocaleTimeString();
-
-    db.run(
-        `
-        INSERT INTO dolares(
-
-            uno,
-            dos,
-            cinco,
-            diez,
-            veinte,
-            cincuenta,
-            cien,
-
-            tasa,
-
-            total_usd,
-            total_dop,
-
-            fecha,
-            hora
-
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `,
-        [
-
-            uno,
-            dos,
-            cinco,
-            diez,
-            veinte,
-            cincuenta,
-            cien,
-
-            tasa,
-
-            totalUSD,
-            totalDOP,
-
-            fecha,
-            hora
-
-        ],
-        function(err){
-
-            if(err){
-
-                return res.status(500).json({
-                    error: err.message
-                });
-
-            }
-
-            res.json({
-
-                mensaje:
-                "Dólares registrados",
-
-                totalUSD,
-                totalDOP
-
-            });
-
-        }
-    );
-
-});
-
-//----------------------------------------
-
-app.get("/dolares", (req, res) => {
-
-    db.all(
-        `
-        SELECT *
-        FROM dolares
-        ORDER BY id DESC
-        `,
-        [],
-        (err, rows) => {
-
-            if(err){
-
-                return res.status(500).json({
-                    error: err.message
-                });
-
-            }
-
-            res.json(rows);
-
-        }
-    );
-
-});
-//______________________________________________________________________
-
-app.get("/reporte-final", (req, res) => {
-
-    /* =========================
-       VENTAS
-    ========================= */
-
-    db.get(
-        `
-        SELECT SUM(total) AS totalVentas
-        FROM ventas
-        `,
-        [],
-        (err, ventas) => {
-
-            if(err){
-
-                return res.status(500).json({
-                    error: err.message
-                });
-
-            }
-
-            /* =========================
-               GASTOS
-            ========================= */
-
-            db.get(
-                `
-                SELECT SUM(monto) AS totalGastos
-                FROM gastos
-                `,
-                [],
-                (err, gastos) => {
-
-                    if(err){
-
-                        return res.status(500).json({
-                            error: err.message
-                        });
-
-                    }
-
-                    /* =========================
-                       DEPOSITOS
-                    ========================= */
-
-                    db.get(
-                        `
-                        SELECT SUM(monto) AS totalDepositos
-                        FROM depositos
-                        `,
-                        [],
-                        (err, depositos) => {
-
-                            if(err){
-
-                                return res.status(500).json({
-                                    error: err.message
-                                });
-
-                            }
-
-                            /* =========================
-                               DOLARES
-                            ========================= */
-
-                            db.get(
-                                `
-                                SELECT SUM(total_dop)
-                                AS totalDolares
-                                FROM dolares
-                                `,
-                                [],
-                                (err, dolares) => {
-
-                                    if(err){
-
-                                        return res.status(500).json({
-                                            error: err.message
-                                        });
-
-                                    }
-
-                                    const totalVentas =
-                                        ventas.totalVentas || 0;
-
-                                    const totalGastos =
-                                        gastos.totalGastos || 0;
-
-                                    const totalDepositos =
-                                        depositos.totalDepositos || 0;
-
-                                    const totalDolares =
-                                        dolares.totalDolares || 0;
-
-                                    const totalFinal =
-
-                                        totalVentas
-                                        - totalGastos
-                                        + totalDepositos
-                                        + totalDolares;
-
-                                    res.json({
-
-                                        totalVentas,
-
-                                        totalGastos,
-
-                                        totalDepositos,
-
-                                        totalDolares,
-
-                                        totalFinal
-
-                                    });
-
-                                }
-                            );
-
-                        }
-                    );
-
-                }
-            );
-
-        }
-    );
-
-});
-
-
-/*================================================================
-    Caja 
-==================================================================*/
-
-app.post("/guardar-caja", (req, res) => {
-
-    const {
-
-        total_ventas,
-        total_gastos,
-        total_depositos,
-        total_dolares,
-        total_final,
-        faltante,
-        estado,
-        observacion
-
-    } = req.body;
-
-    const fecha =
-        new Date().toLocaleDateString();
-
-    const hora =
-        new Date().toLocaleTimeString();
-
-    db.run(
-        `
-        INSERT INTO caja (
-
-            fecha,
-            hora,
-
-            total_ventas,
-            total_gastos,
-            total_depositos,
-            total_dolares,
-            total_final,
-
-            faltante,
-
-            estado,
-            observacion
-
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `,
-        [
-
-            fecha,
-            hora,
-
-            total_ventas,
-            total_gastos,
-            total_depositos,
-            total_dolares,
-            total_final,
-
-            faltante,
-
-            estado,
-            observacion
-
-        ],
-        function(err){
-
-            if(err){
-
-                return res.status(500).json({
-                    error: err.message
-                });
-
-            }
-
-            res.json({
-                mensaje:
-                "Caja guardada correctamente"
-            });
-
-        }
-    );
-
-});
-
-app.get("/caja", (req, res) => {
-
-    db.all(
-        `
-        SELECT *
-        FROM caja
-        ORDER BY id DESC
-        `,
-        [],
-        (err, rows) => {
-
-            if(err){
-
-                return res.status(500).json({
-                    error: err.message
-                });
-
-            }
-
-            res.json(rows);
-
-        }
-    );
-
-});
-
-/*================================================================
-    Inventario
-==================================================================*/
-
-app.post(
-    "/crear-movimiento",
-    (req, res) => {
-
-        const {
-            producto_id,
-            tipo,
-            cantidad,
-            detalle
-        } = req.body;
-
-        const fecha =
-            new Date().toLocaleDateString();
-
-        const hora =
-            new Date().toLocaleTimeString();
-
-        /* =========================
-           OBTENER STOCK ACTUAL
-        ========================= */
-
-        db.get(
-            `
-            SELECT stock
-            FROM productos
-            WHERE id = ?
-            `,
-            [producto_id],
-            (err, producto) => {
-
-                if(err){
-
-                    return res.status(500).json({
-                        error: err.message
-                    });
-
-                }
-
-                if(!producto){
-
-                    return res.status(404).json({
-                        error:"Producto no encontrado"
-                    });
-
-                }
-
-                let nuevoStock =
-                    producto.stock;
-
-                /* =========================
-                   CALCULAR STOCK
-                ========================= */
-
-                if(tipo === "ENTRADA"){
-
-                    nuevoStock +=
-                        parseInt(cantidad);
-
-                }
-
-                if(tipo === "SALIDA"){
-
-                    nuevoStock -=
-                        parseInt(cantidad);
-
-                    if(nuevoStock < 0){
-
-                        nuevoStock = 0;
-
-                    }
-
-                }
-
-                /* =========================
-                   ACTUALIZAR PRODUCTO
-                ========================= */
-
-                db.run(
-                    `
-                    UPDATE productos
-                    SET stock = ?
-                    WHERE id = ?
-                    `,
-                    [
-                        nuevoStock,
-                        producto_id
-                    ],
-                    function(err){
-
-                        if(err){
-
-                            return res.status(500).json({
-                                error: err.message
-                            });
-
-                        }
-
-                        /* =========================
-                           GUARDAR MOVIMIENTO
-                        ========================= */
-
-                        db.run(
-                            `
-                            INSERT INTO movimientos(
-                                producto_id,
-                                tipo,
-                                cantidad,
-                                detalle,
-                                fecha,
-                                hora
-                            )
-                            VALUES (?, ?, ?, ?, ?, ?)
-                            `,
-                            [
-                                producto_id,
-                                tipo,
-                                cantidad,
-                                detalle,
-                                fecha,
-                                hora
-                            ],
-                            function(err){
-
-                                if(err){
-
-                                    return res.status(500).json({
-                                        error: err.message
-                                    });
-
-                                }
-
-                                res.json({
-
-                                    mensaje:
-                                    "Movimiento registrado",
-
-                                    stock:nuevoStock
-
-                                });
-
-                            }
-                        );
-
-                    }
-                );
-
-            }
-        );
-
+    try {
+        const result = await query(`SELECT * FROM usuarios WHERE usuario = $1`, [usuario]);
+        const user = result.rows[0];
+        if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+        
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) return res.status(401).json({ error: "Contraseña incorrecta" });
+        
+        res.json({
+            mensaje: "Login correcto",
+            usuario: { id: user.id, nombre: user.nombre, rol: user.rol }
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-);
-
-
-app.get(
-    "/movimientos",
-    (req, res) => {
-
-        db.all(
-            `
-            SELECT
-                movimientos.*,
-                productos.nombre
-            FROM movimientos
-
-            INNER JOIN productos
-            ON productos.id =
-            movimientos.producto_id
-
-            ORDER BY movimientos.id DESC
-            `,
-            [],
-            (err, rows) => {
-
-                if(err){
-
-                    return res.status(500).json({
-                        error: err.message
-                    });
-
-                }
-
-                res.json(rows);
-
-            }
-        );
-
-    }
-);
-
-
-/*======================================================================
-    Menu
-========================================================================*/
-app.post(
-    "/crear-menu",
-    upload.single("imagen"),
-    (req, res) => {
-
-        const {
-            nombre,
-            precio,
-            categoria
-        } = req.body;
-
-        const imagen = req.file
-            ? req.file.filename
-            : null;
-
-        db.run(
-            `
-            INSERT INTO menus(
-                nombre,
-                precio,
-                categoria,
-                imagen
-            )
-            VALUES (?, ?, ?, ?)
-            `,
-            [
-                nombre,
-                precio,
-                categoria,
-                imagen
-            ],
-            function(err){
-
-                if(err){
-
-                    return res.status(500).json({
-                        error: err.message
-                    });
-
-                }
-
-                res.json({
-                    mensaje:"Producto agregado"
-                });
-
-            }
-        );
-
-    }
-);
-
-app.get("/menus", (req, res) => {
-
-    db.all(
-        `
-        SELECT *
-        FROM menus
-        ORDER BY id DESC
-        `,
-        [],
-        (err, rows) => {
-
-            if(err){
-
-                return res.status(500).json({
-                    error: err.message
-                });
-
-            }
-
-            res.json(rows);
-
-        }
-    );
-
 });
 
-app.delete("/eliminar-menu/:id", (req, res) => {
-
-    const id = req.params.id;
-
-    db.run(
-        `
-        DELETE FROM menus
-        WHERE id = ?
-        `,
-        [id],
-        function(err){
-
-            if(err){
-
-                return res.status(500).json({
-                    error: err.message
-                });
-
-            }
-
-            res.json({
-                mensaje:"Producto eliminado"
-            });
-
-        }
-    );
-
-});
-
-
-
-app.post(
-    "/crear-producto",
-    upload.single("imagen"),
-    (req, res) => {
-
-        const {
-            nombre,
-            categoria,
-            stock,
-            costo,
-            suplidor
-        } = req.body;
-
-        const imagen = req.file
-            ? req.file.filename
-            : null;
-
-        const fecha =
-            new Date().toLocaleDateString();
-
-        db.run(
-            `
-            INSERT INTO productos(
-                nombre,
-                categoria,
-                stock,
-                costo,
-                suplidor,
-                imagen,
-                fecha
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            `,
-            [
-                nombre,
-                categoria,
-                stock,
-                costo,
-                suplidor,
-                imagen,
-                fecha
-            ],
-            function(err){
-
-                if(err){
-
-                    return res.status(500).json({
-                        error: err.message
-                    });
-
-                }
-
-                res.json({
-                    mensaje:"Producto agregado"
-                });
-
-            }
-        );
-
-    }
-);
-
-app.get("/productos", (req, res) => {
-
-    db.all(
-        `
-        SELECT * FROM productos
-        ORDER BY id DESC
-        `,
-        [],
-        (err, rows) => {
-
-            if(err){
-
-                return res.status(500).json({
-                    error: err.message
-                });
-
-            }
-
-            res.json(rows);
-
-        }
-    );
-
-});
-
-app.delete(
-    "/eliminar-producto/:id",
-    (req, res) => {
-
-        const { id } = req.params;
-
-        db.run(
-            `
-            DELETE FROM productos
-            WHERE id = ?
-            `,
-            [id],
-            function(err){
-
-                if(err){
-
-                    return res.status(500).json({
-                        error: err.message
-                    });
-
-                }
-
-                res.json({
-                    mensaje:"Producto eliminado"
-                });
-
-            }
-        );
-
-    }
-);
-
-
-//NUEVO
-app.get("/empleados", (req, res) => {
-
-    db.all(
-        `
-        SELECT id, nombre
-        FROM usuarios
-        `,
-        [],
-        (err, rows) => {
-
-            if(err){
-                return res.status(500).json({
-                    error: err.message
-                });
-            }
-
-            res.json(rows);
-
-        }
-    );
-
-});
-
-//NUEVO
-app.post("/asistencia", (req, res) => {
-
-    const { usuario_id, tipo } = req.body;
-
+/* =========================
+   VENTAS
+========================= */
+app.post("/crear-venta", async (req, res) => {
+    const { producto, cantidad, precio } = req.body;
+    const total = cantidad * precio;
     const fecha = new Date().toLocaleDateString();
     const hora = new Date().toLocaleTimeString();
-
-    db.run(
-        `
-        INSERT INTO asistencia(
-            usuario_id,
-            tipo,
-            fecha,
-            hora
-        )
-        VALUES (?, ?, ?, ?)
-        `,
-        [
-            usuario_id,
-            tipo,
-            fecha,
-            hora
-        ],
-        function(err){
-
-            if(err){
-                return res.status(500).json({
-                    error: err.message
-                });
-            }
-
-            res.json({
-                mensaje: `${tipo} registrada con éxito`,
-                fecha,
-                hora
-            });
-
-        }
-    );
-
-});
-
-/*=====================================================
-    Control de ventas V1
-=======================================================*/
-app.post("/guardar-cuadre", (req, res) => {
-
-    const {
-        total_ventas,
-        total_efectivo,
-        productos
-    } = req.body;
-
-    const fecha =
-        new Date().toLocaleDateString();
-
-    const hora =
-        new Date().toLocaleTimeString();
-
-    const diferencia =
-        total_efectivo - total_ventas;
-
-    db.run(
-        `
-        INSERT INTO cuadres(
-            fecha,
-            hora,
-            total_ventas,
-            total_efectivo
-        )
-        VALUES (?, ?, ?, ?)
-        `,
-        [
-            fecha,
-            hora,
-            total_ventas,
-            total_efectivo
-        ],
-        function(err){
-
-            if(err){
-
-                console.log(err);
-
-                return res.status(500).json({
-                    error: err.message
-                });
-
-            }
-
-            const cuadreID = this.lastID;
-
-            if(
-                productos &&
-                productos.length > 0
-            ){
-
-                productos.forEach(prod => {
-
-                    db.run(
-                        `
-                        INSERT INTO productos_vendidos(
-                            cuadre_id,
-                            producto,
-                            precio
-                        )
-                        VALUES (?, ?, ?)
-                        `,
-                        [
-                            cuadreID,
-                            prod.nombre,
-                            prod.precio
-                        ]
-                    );
-
-                });
-
-            }
-
-            return res.json({
-
-                mensaje:
-                    "Cuadre guardado correctamente",
-
-                diferencia:
-                    diferencia
-
-            });
-
-        }
-
-    );
-
-});
-
-app.get("/historial-cuadres", (req, res) => {
-
-    db.all(
-        `
-        SELECT *
-        FROM cuadres
-        ORDER BY id DESC
-        `,
-        [],
-        (err, rows) => {
-
-            if(err){
-                return res.status(500).json({
-                    error: err.message
-                });
-            }
-
-            res.json(rows);
-
-        }
-    );
-
-});
-
-
-app.post("/verificar-empleado", (req, res) => {
-
-    const { id, password } = req.body;
-
-    db.get(
-        `
-        SELECT * FROM usuarios
-        WHERE id = ?
-        `,
-        [id],
-        async (err, user) => {
-
-            if(err){
-                return res.status(500).json({
-                    error: err.message
-                });
-            }
-
-            if(!user){
-                return res.status(404).json({
-                    error: "Empleado no encontrado"
-                });
-            }
-
-            const validPassword = await bcrypt.compare(
-                password,
-                user.password
-            );
-
-            if(!validPassword){
-                return res.status(401).json({
-                    error: "Contraseña incorrecta"
-                });
-            }
-
-            res.json({
-                mensaje: "Acceso correcto"
-            });
-
-        }
-    );
-
-});
-
-
-app.get("/cambiar-password", async (req, res) => {
-
+    
     try {
-
-        const hashedPassword =
-            await bcrypt.hash("0008", 10);
-
-        db.run(
-            `
-            UPDATE usuarios
-            SET password = ?
-            WHERE usuario = ?
-            `,
-            [
-                hashedPassword,
-                "Fara"
-            ],
-            function(err){
-
-                if(err){
-                    return res.send(err.message);
-                }
-
-                res.send(
-                    "Contraseña actualizada"
-                );
-
-            }
+        await query(
+            `INSERT INTO ventas(producto, cantidad, precio, total, fecha, hora) VALUES ($1, $2, $3, $4, $5, $6)`,
+            [producto, cantidad, precio, total, fecha, hora]
         );
-
-    } catch(error){
-
-        res.send(error.message);
-
+        res.json({ mensaje: "Venta registrada", total });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-
 });
 
-/*=======================================================
-    Decomiso
-=========================================================*/
-
-app.post("/decomiso", (req, res) => {
-
-    const {
-
-        producto,
-        cantidad,
-        motivo,
-        responsable
-
-    } = req.body;
-
-    const fecha =
-        new Date().toLocaleDateString();
-
-    const hora =
-        new Date().toLocaleTimeString();
-
-    db.run(
-        `
-        INSERT INTO decomiso(
-
-            producto,
-            cantidad,
-            motivo,
-            responsable,
-            fecha,
-            hora
-
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-        `,
-        [
-
-            producto,
-            cantidad,
-            motivo,
-            responsable,
-            fecha,
-            hora
-
-        ],
-        function(err){
-
-            if(err){
-
-                return res.status(500).json({
-                    error: err.message
-                });
-
-            }
-
-            res.json({
-                mensaje:
-                "Decomiso registrado"
-            });
-
-        }
-    );
-
+app.get("/ventas", async (req, res) => {
+    try {
+        const result = await query(`SELECT * FROM ventas ORDER BY id DESC`);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
-app.get("/decomiso", (req, res) => {
+/* =========================
+   GASTOS
+========================= */
+app.post("/crear-gasto", async (req, res) => {
+    const { descripcion, monto } = req.body;
+    const fecha = new Date().toLocaleDateString();
+    const hora = new Date().toLocaleTimeString();
+    
+    try {
+        await query(`INSERT INTO gastos(descripcion, monto, fecha, hora) VALUES ($1, $2, $3, $4)`,
+            [descripcion, monto, fecha, hora]);
+        res.json({ mensaje: "Gasto registrado" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
-    db.all(
-        `
-        SELECT *
-        FROM decomiso
-        ORDER BY id DESC
-        `,
-        [],
-        (err, rows) => {
+app.get("/gastos", async (req, res) => {
+    try {
+        const result = await query(`SELECT * FROM gastos ORDER BY id DESC`);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
-            if(err){
+/* =========================
+   DEPOSITOS
+========================= */
+app.post("/crear-deposito", async (req, res) => {
+    const { cliente, monto, banco, referencia } = req.body;
+    const fecha = new Date().toLocaleDateString();
+    const hora = new Date().toLocaleTimeString();
+    
+    try {
+        await query(
+            `INSERT INTO depositos(cliente, monto, banco, referencia, fecha, hora) VALUES ($1, $2, $3, $4, $5, $6)`,
+            [cliente, monto, banco, referencia, fecha, hora]
+        );
+        res.json({ mensaje: "Depósito registrado" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
-                return res.status(500).json({
-                    error: err.message
-                });
+app.get("/depositos", async (req, res) => {
+    try {
+        const result = await query(`SELECT * FROM depositos ORDER BY id DESC`);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
+/* =========================
+   DOLARES
+========================= */
+app.post("/guardar-dolares", async (req, res) => {
+    const { uno, dos, cinco, diez, veinte, cincuenta, cien, tasa } = req.body;
+    const totalUSD = (uno*1) + (dos*2) + (cinco*5) + (diez*10) + (veinte*20) + (cincuenta*50) + (cien*100);
+    const totalDOP = totalUSD * tasa;
+    const fecha = new Date().toLocaleDateString();
+    const hora = new Date().toLocaleTimeString();
+    
+    try {
+        await query(
+            `INSERT INTO dolares(uno, dos, cinco, diez, veinte, cincuenta, cien, tasa, total_usd, total_dop, fecha, hora)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+            [uno, dos, cinco, diez, veinte, cincuenta, cien, tasa, totalUSD, totalDOP, fecha, hora]
+        );
+        res.json({ mensaje: "Dólares registrados", totalUSD, totalDOP });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get("/dolares", async (req, res) => {
+    try {
+        const result = await query(`SELECT * FROM dolares ORDER BY id DESC`);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/* =========================
+   REPORTE FINAL
+========================= */
+app.get("/reporte-final", async (req, res) => {
+    try {
+        const ventas = await query(`SELECT COALESCE(SUM(total), 0) as totalVentas FROM ventas`);
+        const gastos = await query(`SELECT COALESCE(SUM(monto), 0) as totalGastos FROM gastos`);
+        const depositos = await query(`SELECT COALESCE(SUM(monto), 0) as totalDepositos FROM depositos`);
+        const dolares = await query(`SELECT COALESCE(SUM(total_dop), 0) as totalDolares FROM dolares`);
+        
+        const totalVentas = parseFloat(ventas.rows[0].totalventas);
+        const totalGastos = parseFloat(gastos.rows[0].totalgastos);
+        const totalDepositos = parseFloat(depositos.rows[0].totaldepositos);
+        const totalDolares = parseFloat(dolares.rows[0].totaldolares);
+        const totalFinal = totalVentas - totalGastos + totalDepositos + totalDolares;
+        
+        res.json({ totalVentas, totalGastos, totalDepositos, totalDolares, totalFinal });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/* =========================
+   CAJA
+========================= */
+app.post("/guardar-caja", async (req, res) => {
+    const { total_ventas, total_gastos, total_depositos, total_dolares, total_final, faltante, estado, observacion } = req.body;
+    const fecha = new Date().toLocaleDateString();
+    const hora = new Date().toLocaleTimeString();
+    
+    try {
+        await query(
+            `INSERT INTO caja(fecha, hora, total_ventas, total_gastos, total_depositos, total_dolares, total_final, faltante, estado, observacion)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+            [fecha, hora, total_ventas, total_gastos, total_depositos, total_dolares, total_final, faltante, estado, observacion]
+        );
+        res.json({ mensaje: "Caja guardada correctamente" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get("/caja", async (req, res) => {
+    try {
+        const result = await query(`SELECT * FROM caja ORDER BY id DESC`);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/* =========================
+   INVENTARIO - MOVIMIENTOS
+========================= */
+app.post("/crear-movimiento", async (req, res) => {
+    const { producto_id, tipo, cantidad, detalle } = req.body;
+    const fecha = new Date().toLocaleDateString();
+    const hora = new Date().toLocaleTimeString();
+    
+    try {
+        const producto = await query(`SELECT stock FROM productos WHERE id = $1`, [producto_id]);
+        if (!producto.rows[0]) return res.status(404).json({ error: "Producto no encontrado" });
+        
+        let nuevoStock = producto.rows[0].stock;
+        if (tipo === "ENTRADA") nuevoStock += parseInt(cantidad);
+        if (tipo === "SALIDA") nuevoStock = Math.max(0, nuevoStock - parseInt(cantidad));
+        
+        await query(`UPDATE productos SET stock = $1 WHERE id = $2`, [nuevoStock, producto_id]);
+        await query(
+            `INSERT INTO movimientos(producto_id, tipo, cantidad, detalle, fecha, hora) VALUES ($1, $2, $3, $4, $5, $6)`,
+            [producto_id, tipo, cantidad, detalle, fecha, hora]
+        );
+        res.json({ mensaje: "Movimiento registrado", stock: nuevoStock });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get("/movimientos", async (req, res) => {
+    try {
+        const result = await query(`
+            SELECT movimientos.*, productos.nombre 
+            FROM movimientos 
+            INNER JOIN productos ON productos.id = movimientos.producto_id 
+            ORDER BY movimientos.id DESC
+        `);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/* =========================
+   MENU
+========================= */
+app.post("/crear-menu", upload.single("imagen"), async (req, res) => {
+    const { nombre, precio, categoria } = req.body;
+    const imagen = req.file ? req.file.filename : null;
+    
+    try {
+        await query(`INSERT INTO menus(nombre, precio, categoria, imagen) VALUES ($1, $2, $3, $4)`,
+            [nombre, precio, categoria, imagen]);
+        res.json({ mensaje: "Producto agregado" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get("/menus", async (req, res) => {
+    try {
+        const result = await query(`SELECT * FROM menus ORDER BY id DESC`);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.delete("/eliminar-menu/:id", async (req, res) => {
+    const id = req.params.id;
+    try {
+        await query(`DELETE FROM menus WHERE id = $1`, [id]);
+        res.json({ mensaje: "Producto eliminado" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/* =========================
+   PRODUCTOS
+========================= */
+app.post("/crear-producto", upload.single("imagen"), async (req, res) => {
+    const { nombre, categoria, stock, costo, suplidor } = req.body;
+    const imagen = req.file ? req.file.filename : null;
+    const fecha = new Date().toLocaleDateString();
+    
+    try {
+        await query(
+            `INSERT INTO productos(nombre, categoria, stock, costo, suplidor, imagen, fecha) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            [nombre, categoria, stock, costo, suplidor, imagen, fecha]
+        );
+        res.json({ mensaje: "Producto agregado" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get("/productos", async (req, res) => {
+    try {
+        const result = await query(`SELECT * FROM productos ORDER BY id DESC`);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.delete("/eliminar-producto/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        await query(`DELETE FROM productos WHERE id = $1`, [id]);
+        res.json({ mensaje: "Producto eliminado" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/* =========================
+   EMPLEADOS (lista simple)
+========================= */
+app.get("/empleados", async (req, res) => {
+    try {
+        const result = await query(`SELECT id, nombre FROM usuarios`);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/* =========================
+   ASISTENCIA
+========================= */
+app.post("/asistencia", async (req, res) => {
+    const { usuario_id, tipo } = req.body;
+    const fecha = new Date().toLocaleDateString();
+    const hora = new Date().toLocaleTimeString();
+    
+    try {
+        await query(`INSERT INTO asistencia(usuario_id, tipo, fecha, hora) VALUES ($1, $2, $3, $4)`,
+            [usuario_id, tipo, fecha, hora]);
+        res.json({ mensaje: `${tipo} registrada con éxito`, fecha, hora });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/* =========================
+   CUADRE (Control de ventas)
+========================= */
+app.post("/guardar-cuadre", async (req, res) => {
+    const { total_ventas, total_efectivo, productos } = req.body;
+    const fecha = new Date().toLocaleDateString();
+    const hora = new Date().toLocaleTimeString();
+    const diferencia = total_efectivo - total_ventas;
+    
+    try {
+        const result = await query(
+            `INSERT INTO cuadres(fecha, hora, total_ventas, total_efectivo) VALUES ($1, $2, $3, $4) RETURNING id`,
+            [fecha, hora, total_ventas, total_efectivo]
+        );
+        const cuadreID = result.rows[0].id;
+        
+        if (productos && productos.length > 0) {
+            for (const prod of productos) {
+                await query(`INSERT INTO productos_vendidos(cuadre_id, producto, precio) VALUES ($1, $2, $3)`,
+                    [cuadreID, prod.nombre, prod.precio]);
             }
-
-            res.json(rows);
-
         }
-    );
+        res.json({ mensaje: "Cuadre guardado correctamente", diferencia });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
-}); 
+app.get("/historial-cuadres", async (req, res) => {
+    try {
+        const result = await query(`SELECT * FROM cuadres ORDER BY id DESC`);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/* =========================
+   VERIFICAR EMPLEADO
+========================= */
+app.post("/verificar-empleado", async (req, res) => {
+    const { id, password } = req.body;
+    try {
+        const result = await query(`SELECT * FROM usuarios WHERE id = $1`, [id]);
+        const user = result.rows[0];
+        if (!user) return res.status(404).json({ error: "Empleado no encontrado" });
+        
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) return res.status(401).json({ error: "Contraseña incorrecta" });
+        
+        res.json({ mensaje: "Acceso correcto" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/* =========================
+   CAMBIAR PASSWORD (para Fara)
+========================= */
+app.get("/cambiar-password", async (req, res) => {
+    try {
+        const hashedPassword = await bcrypt.hash("0008", 10);
+        await query(`UPDATE usuarios SET password = $1 WHERE usuario = $2`, [hashedPassword, "Fara"]);
+        res.send("Contraseña actualizada");
+    } catch (error) {
+        res.send(error.message);
+    }
+});
+
+/* =========================
+   DECOMISO
+========================= */
+app.post("/decomiso", async (req, res) => {
+    const { producto, cantidad, motivo, responsable } = req.body;
+    const fecha = new Date().toLocaleDateString();
+    const hora = new Date().toLocaleTimeString();
+    
+    try {
+        await query(
+            `INSERT INTO decomiso(producto, cantidad, motivo, responsable, fecha, hora) VALUES ($1, $2, $3, $4, $5, $6)`,
+            [producto, cantidad, motivo, responsable, fecha, hora]
+        );
+        res.json({ mensaje: "Decomiso registrado" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get("/decomiso", async (req, res) => {
+    try {
+        const result = await query(`SELECT * FROM decomiso ORDER BY id DESC`);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/* =========================
+   CREAR ADMIN (endpoint útil)
+========================= */
+app.get("/crear-admin", async (req, res) => {
+    try {
+        const hashedPassword = await bcrypt.hash("4321", 10);
+        await query(
+            `INSERT INTO usuarios(nombre, usuario, password, rol) VALUES ($1, $2, $3, $4)`,
+            ["Administrador", "admin", hashedPassword, "admin"]
+        );
+        res.send("Administrador creado con exito");
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error.message);
+    }
+});
 
 /* =========================
    SERVIDOR
 ========================= */
-
-
 app.listen(PORT, () => {
-    console.log("Servidor corriendo en puerto " + PORT);
-});
-
-app.get("/crear-admin", async (req, res) => {
-
-    try {
-
-        const hashedPassword = await bcrypt.hash("4321", 10);
-
-        db.run(
-            `
-            INSERT INTO usuarios(nombre, usuario, password, rol)
-            VALUES (?,?,?,?)
-            `,
-            [
-                "Administrador",
-                "admin",
-                hashedPassword,
-                "admin"
-            ],
-            function(err) {
-
-                if(err) {
-                    console.log(err);
-                    return res.send(err.message);
-                }
-
-                res.send("Administrador creado con exito");
-
-            }
-        );
-
-    } catch(error) {
-
-        console.log(error);
-
-        res.status(500).send(error.message);
-
-    }
-
+    console.log(`🚀 Servidor corriendo en puerto ${PORT} con PostgreSQL`);
 });
