@@ -291,6 +291,10 @@ app.post("/crear-venta", async (req, res) => {
     const { producto, cantidad, precio } = req.body;
     const total = cantidad * precio;
 
+const total = cantidad * precio;
+
+const ahora = new Date();
+
 const fecha = ahora.toLocaleDateString(
     "es-DO",
     {
@@ -333,8 +337,24 @@ app.get("/ventas", async (req, res) => {
 ========================= */
 app.post("/crear-gasto", async (req, res) => {
     const { descripcion, monto } = req.body;
-    const fecha = new Date().toLocaleDateString();
-    const hora = new Date().toLocaleTimeString();
+    const ahora = new Date();
+
+const fecha = ahora.toLocaleDateString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo"
+    }
+);
+
+    const hora = ahora.toLocaleTimeString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    }
+);
     
     try {
         await query(`INSERT INTO gastos(descripcion, monto, fecha, hora) VALUES ($1, $2, $3, $4)`,
@@ -359,8 +379,24 @@ app.get("/gastos", async (req, res) => {
 ========================= */
 app.post("/crear-deposito", async (req, res) => {
     const { cliente, monto, banco, referencia } = req.body;
-    const fecha = new Date().toLocaleDateString();
-    const hora = new Date().toLocaleTimeString();
+    const ahora = new Date();
+
+const fecha = ahora.toLocaleDateString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo"
+    }
+);
+
+    const hora = ahora.toLocaleTimeString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    }
+);
     
     try {
         await query(
@@ -389,8 +425,24 @@ app.post("/guardar-dolares", async (req, res) => {
     const { uno, dos, cinco, diez, veinte, cincuenta, cien, tasa } = req.body;
     const totalUSD = (uno*1) + (dos*2) + (cinco*5) + (diez*10) + (veinte*20) + (cincuenta*50) + (cien*100);
     const totalDOP = totalUSD * tasa;
-    const fecha = new Date().toLocaleDateString();
-    const hora = new Date().toLocaleTimeString();
+    const ahora = new Date();
+
+const fecha = ahora.toLocaleDateString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo"
+    }
+);
+
+    const hora = ahora.toLocaleTimeString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    }
+);
     
     try {
         await query(
@@ -440,8 +492,24 @@ app.get("/reporte-final", async (req, res) => {
 ========================= */
 app.post("/guardar-caja", async (req, res) => {
     const { total_ventas, total_gastos, total_depositos, total_dolares, total_final, faltante, estado, observacion } = req.body;
-    const fecha = new Date().toLocaleDateString();
-    const hora = new Date().toLocaleTimeString();
+    const ahora = new Date();
+
+const fecha = ahora.toLocaleDateString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo"
+    }
+);
+
+    const hora = ahora.toLocaleTimeString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    }
+);
     
     try {
         await query(
@@ -469,8 +537,24 @@ app.get("/caja", async (req, res) => {
 ========================= */
 app.post("/crear-movimiento", async (req, res) => {
     const { producto_id, tipo, cantidad, detalle } = req.body;
-    const fecha = new Date().toLocaleDateString();
-    const hora = new Date().toLocaleTimeString();
+    const ahora = new Date();
+
+const fecha = ahora.toLocaleDateString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo"
+    }
+);
+
+    const hora = ahora.toLocaleTimeString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    }
+);
     
     try {
         const producto = await query(`SELECT stock FROM productos WHERE id = $1`, [producto_id]);
@@ -546,7 +630,15 @@ app.delete("/eliminar-menu/:id", async (req, res) => {
 app.post("/crear-producto", upload.single("imagen"), async (req, res) => {
     const { nombre, categoria, stock, costo, suplidor } = req.body;
     const imagen = req.file ? req.file.filename : null;
-    const fecha = new Date().toLocaleDateString();
+    const ahora = new Date();
+
+const fecha = ahora.toLocaleDateString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo"
+    }
+);
+
     
     try {
         await query(
@@ -595,8 +687,24 @@ app.get("/empleados", async (req, res) => {
 ========================= */
 app.post("/asistencia", async (req, res) => {
     const { usuario_id, tipo } = req.body;
-    const fecha = new Date().toLocaleDateString();
-    const hora = new Date().toLocaleTimeString();
+    const ahora = new Date();
+
+const fecha = ahora.toLocaleDateString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo"
+    }
+);
+
+    const hora = ahora.toLocaleTimeString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    }
+);
     
     try {
         await query(`INSERT INTO asistencia(usuario_id, tipo, fecha, hora) VALUES ($1, $2, $3, $4)`,
@@ -612,8 +720,24 @@ app.post("/asistencia", async (req, res) => {
 ========================= */
 app.post("/guardar-cuadre", async (req, res) => {
     const { total_ventas, total_efectivo, productos } = req.body;
-    const fecha = new Date().toLocaleDateString();
-    const hora = new Date().toLocaleTimeString();
+    const ahora = new Date();
+
+const fecha = ahora.toLocaleDateString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo"
+    }
+);
+
+    const hora = ahora.toLocaleTimeString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    }
+);
     const diferencia = total_efectivo - total_ventas;
     
     try {
@@ -682,8 +806,24 @@ app.get("/cambiar-password", async (req, res) => {
 ========================= */
 app.post("/decomiso", async (req, res) => {
     const { producto, cantidad, motivo, responsable } = req.body;
-    const fecha = new Date().toLocaleDateString();
-    const hora = new Date().toLocaleTimeString();
+    const ahora = new Date();
+
+const fecha = ahora.toLocaleDateString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo"
+    }
+);
+
+    const hora = ahora.toLocaleTimeString(
+    "es-DO",
+    {
+        timeZone: "America/Santo_Domingo",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    }
+);
     
     try {
         await query(
