@@ -388,6 +388,64 @@ tr:hover{
 
 }
 
+.nav{
+
+    display:flex;
+    gap:15px;
+    padding:20px;
+    background:#111;
+    border-bottom:1px solid #111;
+    overflow-x:auto;
+
+}
+
+.nav-btn{
+
+    background:#111;
+    border:none;
+    color:white;
+    padding:14px 22px;
+    border-radius:14px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.2s;
+    min-width:max-content;
+
+}
+
+.nav-btn:hover{
+
+    background:#374151;
+    transform:translateY(-2px);
+
+}
+
+.nav-btn.active{
+
+    background:#10b981;
+    color:white;
+
+}
+
+.reloj-box{
+    background:#111827;
+    color:white;
+    padding:15px;
+    border-radius:15px;
+    margin-bottom:20px;
+    text-align:center;
+}
+
+#relojHora{
+    font-size:32px;
+    margin:0;
+}
+
+#relojFecha{
+    margin-top:5px;
+    opacity:.8;
+}
 </style>
 
 </head>
@@ -397,7 +455,7 @@ tr:hover{
 
     <div class="logo">
 
-        🔥 SDN
+         SDN
 
         <span>
             Control
@@ -453,7 +511,12 @@ tr:hover{
 </div>
 
 
-<h1>💰 Cuadre de Caja</h1>
+<h1> Control de venta</h1>
+
+<div class="reloj-box">
+    <h2 id="relojHora">00:00:00</h2>
+    <p id="relojFecha">Cargando fecha...</p>
+</div>
 
 <div class="container">
 
@@ -468,7 +531,7 @@ tr:hover{
     </h2>
 
     <div id="productos"></div>
-
+    <datalist id="listaProductos"></datalist>
 </div>
 
 <div class="historial">
@@ -782,14 +845,108 @@ tr:hover{
 
 </div>
 
-<script>
+<script type="module">
 
+let productosMenu = [];
 const denominaciones = [
     5,10,25,50,100,200,500,1000,2000
 ];
 
 const moneyGrid =
     document.getElementById("moneyGrid");
+
+async function cargarMenu() {
+
+    try {
+
+        const response = await fetch(
+            "https://sdn-system.onrender.com/menus"
+        );
+
+        productosMenu = await response.json();
+
+    } catch(error) {
+
+        console.log(error);
+
+    }
+
+}
+
+function renderizarSugerencias(){
+
+    const lista =
+        document.getElementById(
+            "listaProductos"
+        );
+
+    lista.innerHTML = "";
+
+    productosMenu.forEach(prod => {
+
+        lista.innerHTML += `
+            <option value="${prod.nombre}">
+        `;
+
+    });
+
+}
+
+function guardarEstadoCuadre(){
+
+    const productos = [];
+
+    document.querySelectorAll(".producto")
+    .forEach(prod => {
+
+        productos.push({
+
+            nombre:
+                prod.querySelector(".nombre").value,
+
+            precio:
+                prod.querySelector(".precio").value
+
+        });
+
+    });
+
+    localStorage.setItem(
+        "cuadre_productos",
+        JSON.stringify(productos)
+    );
+
+}
+
+function restaurarCuadre(){
+
+    const guardado =
+        localStorage.getItem(
+            "cuadre_productos"
+        );
+
+    if(!guardado){
+
+        agregarProducto();
+        return;
+
+    }
+
+    const productos =
+        JSON.parse(guardado);
+
+    productos.forEach(prod => {
+
+        agregarProducto(
+            prod.nombre,
+            prod.precio
+        );
+
+    });
+
+    calcularTodo();
+
+}
 
 denominaciones.forEach(valor => {
 
@@ -813,7 +970,10 @@ denominaciones.forEach(valor => {
 
 });
 
-function agregarProducto(){
+function agregarProducto(
+    nombreInicial = "",
+    precioInicial = ""
+){
 
     const contenedor =
         document.getElementById("productos");
@@ -829,32 +989,100 @@ function agregarProducto(){
             type="text"
             placeholder="Producto"
             class="nombre"
+            value="${nombreInicial}"
+            list="listaProductos"
         >
 
         <input
             type="number"
             placeholder="Precio"
             class="precio"
+            value="${precioInicial}"
         >
+
+        <button
+            class="sumarBtn"
+        >
+            +1
+        </button>
 
     `;
 
     contenedor.appendChild(div);
 
+    const nombreInput =
+        div.querySelector(".nombre");
+
     const precioInput =
         div.querySelector(".precio");
 
-    precioInput.addEventListener(
+    const sumarBtn =
+        div.querySelector(".sumarBtn");
+
+    nombreInput.addEventListener(
         "input",
-        calcularTodo
+        () => {
+
+            const texto =
+                nombreInput.value.toLowerCase();
+
+            const producto =
+                productosMenu.find(p =>
+                    p.nombre.toLowerCase() === texto
+                );
+
+            if(producto){
+
+                precioInput.value =
+                    producto.precio;
+
+                calcularTodo();
+
+            }
+
+            guardarEstadoCuadre();
+
+        }
     );
 
-    guardarVenta(
-    nombre,
-    cantidad,
-    precio
-);
+    precioInput.addEventListener(
+        "input",
+        () => {
+
+            calcularTodo();
+            guardarEstadoCuadre();
+
+        }
+    );
+
+    sumarBtn.addEventListener(
+        "click",
+        () => {
+
+            const nombre =
+                nombreInput.value;
+
+            const precio =
+                parseFloat(precioInput.value) || 0;
+
+            if(!nombre || !precio)
+                return;
+
+            agregarProducto(
+                nombre,
+                precio
+            );
+
+            calcularTodo();
+            guardarEstadoCuadre();
+
+        }
+    );
+
+    guardarEstadoCuadre();
+
 }
+
 
 function calcularTodo(){
 
@@ -965,6 +1193,9 @@ async function guardarCuadre(){
             data.mensaje +
             "\nDiferencia: RD$ " +
             data.diferencia
+        );
+        localStorage.removeItem(
+            "cuadre_productos"
         );
 
     }catch(error){
@@ -1403,12 +1634,35 @@ async function cargarReporteFinal(){
 
 }
 
+function actualizarReloj(){
+
+    const ahora = new Date();
+
+    document.getElementById(
+        "relojHora"
+    ).innerText =
+        ahora.toLocaleTimeString();
+
+    document.getElementById(
+        "relojFecha"
+    ).innerText =
+        ahora.toLocaleDateString();
+
+}
+
+setInterval(actualizarReloj, 1000);
+
+actualizarReloj();
 
 cargarReporteFinal();
 cargarDepositos();
 cargarGastos();
 cargarVentas();
-agregarProducto();
+await cargarMenu();
+
+renderizarSugerencias();
+
+restaurarCuadre();
 cargarHistorial();
 
 </script>
