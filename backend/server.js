@@ -291,8 +291,6 @@ app.post("/crear-venta", async (req, res) => {
     const { producto, cantidad, precio } = req.body;
     const total = cantidad * precio;
 
-const total = cantidad * precio;
-
 const ahora = new Date();
 
 const fecha = ahora.toLocaleDateString(
