@@ -21,7 +21,7 @@ body{
     font-family:'Poppins',sans-serif;
     background:#f5f1e8;
     display:flex;
-    height:100vh;
+    min-height:100vh;
     overflow:hidden;
 }
 
@@ -307,6 +307,174 @@ input{
 ::-webkit-scrollbar-thumb{
     background:#2e7d32;
     border-radius:20px;
+}
+
+@media(max-width:768px){
+
+    body{
+        flex-direction:column;
+        height:auto;
+        overflow:auto;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar{
+
+        width:100%;
+        height:auto;
+        padding:20px;
+        border-right:none;
+        border-bottom:4px solid #2e7d32;
+
+    }
+
+    .logo{
+
+        font-size:28px;
+        text-align:center;
+        margin-bottom:20px;
+
+    }
+
+    .nav{
+
+        display:grid;
+        grid-template-columns:
+        repeat(2,1fr);
+
+        gap:10px;
+
+    }
+
+    .nav-btn{
+
+        font-size:14px;
+        padding:14px;
+        justify-content:center;
+        text-align:center;
+
+    }
+
+    /* CONTENT */
+
+    .content{
+
+        padding:20px;
+
+    }
+
+    /* TOPBAR */
+
+    .topbar{
+
+        flex-direction:column;
+        gap:15px;
+        align-items:flex-start;
+
+    }
+
+    .topbar h1{
+
+        font-size:28px;
+
+    }
+
+    .clock{
+
+        width:100%;
+        text-align:center;
+        font-size:16px;
+
+    }
+
+    /* EMPLEADOS */
+
+    .empleados{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .empleado-card{
+
+        border-radius:22px;
+
+    }
+
+    .card-top{
+
+        height:110px;
+
+    }
+
+    .avatar{
+
+        width:80px;
+        height:80px;
+        font-size:34px;
+        bottom:-40px;
+
+    }
+
+    .card-content{
+
+        padding:55px 15px 20px;
+
+    }
+
+    .card-content h3{
+
+        font-size:20px;
+
+    }
+
+    /* PANEL */
+
+    .panel{
+
+        padding:20px;
+        border-radius:22px;
+
+    }
+
+    .panel h2{
+
+        font-size:24px;
+
+    }
+
+    input{
+
+        padding:16px;
+        font-size:15px;
+
+    }
+
+    .verify-btn,
+    .action-btn{
+
+        padding:16px;
+        font-size:16px;
+
+    }
+
+    .actions{
+
+        flex-direction:column;
+
+    }
+
+    /* TOAST */
+
+    .toast{
+
+        right:10px;
+        left:10px;
+        min-width:auto;
+
+    }
+
 }
 
 </style>
