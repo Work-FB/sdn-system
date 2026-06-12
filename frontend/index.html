@@ -397,6 +397,27 @@ async function login(){
 
 }
 
+// Al recibir respuesta del login
+fetch(`${API_URL}/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ usuario, password })
+})
+.then(res => res.json())
+.then(data => {
+    if (data.usuario) {
+        localStorage.setItem('usuario', JSON.stringify(data.usuario));
+        // Redirigir según rol
+        if (data.usuario.rol === 'admin') {
+            window.location.href = 'dashboard.html';
+        } else if (data.usuario.rol === 'cliente') {
+            window.location.href = 'area-cliente.html';
+        } else {
+            window.location.href = 'dashboard.html'; // tus empleados normales
+        }
+    }
+});
+
 </script>
 
 </body>

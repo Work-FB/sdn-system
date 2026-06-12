@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrador - SDN System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f4f4f4; }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100%;
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+        }
+        
+        .sidebar h2 { margin-bottom: 30px; }
+        .sidebar a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .sidebar a:hover { background: #34495e; }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        .header-admin {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 10px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>🔐 SDN Admin</h2>
+        <a onclick="loadSection('clientes')">👥 Áreas de Clientes</a>
+        <a onclick="loadSection('empleados')">👔 Empleados</a>
+        <a onclick="loadSection('reportes')">📊 Reportes</a>
+        <a onclick="loadSection('menu')">🍽️ Gestionar Menú</a>
+        <a onclick="loadSection('inventario')">📦 Inventario</a>
+    </div>
+    
+    <div class="main-content">
+        <div class="header-admin">
+            <h2 id="section-title">Panel de Control</h2>
+            <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+        </div>
+        
+        <div id="content-area">
+            <div class="card">
+                <h3>Bienvenido Administrador</h3>
+                <p>Selecciona una opción del menú lateral para comenzar</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para editar área de cliente -->
+    <div id="area-modal" class="modal">
+        <div class="modal-content">
+            <h3>✏️ Editar Área del Cliente</h3>
+            <div id="cliente-info"></div>
+            <textarea id="area-content" placeholder="Contenido del área..."></textarea>
+            <br><br>
+            <button onclick="saveClientArea()">💾 Guardar Cambios</button>
+            <button onclick="closeAreaModal()" style="background:#6c757d;">Cancelar</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '// Al recibir respuesta del login
+fetch(`${API_URL}/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ usuario, password })
+})
+.then(res => res.json())
+.then(data => {
+    if (data.usuario) {
+        localStorage.setItem('usuario', JSON.stringify(data.usuario));
+        // Redirigir según rol
+        if (data.usuario.rol === 'admin') {
+            window.location.href = 'admin-dashboard.html';
+        } else if (data.usuario.rol === 'cliente') {
+            window.location.href = 'area-cliente.html';
+        } else {
+            window.location.href = 'dashboard.html'; // tus empleados normales
+        }
+    }
+});';
+        let adminToken = localStorage.getItem('adminToken');
+        let currentClientId = null;
+        
+        // Verificar autenticación
+        if (!adminToken) {
+            window.location.href = 'index.html';
+        }
+        
+        async function loadSection(section) {
+            const titles = {
+                'clientes': '👥 Gestión de Áreas de Clientes',
+                'empleados': '👔 Gestión de Empleados',
+                'reportes': '📊 Reportes del Sistema',
+                'menu': '🍽️ Gestión del Menú',
+                'inventario': '📦 Control de Inventario'
+            };
+            document.getElementById('section-title').innerText = titles[section];
+            
+            if (section === 'clientes') {
+                await loadClientes();
+            } else if (section === 'empleados') {
+                await loadEmpleados();
+            } else {
+                document.getElementById('content-area').innerHTML = '<div class="card"><p>Módulo en desarrollo...</p></div>';
+            }
+        }
+        
+        async function loadClientes() {
+            try {
+                const response = await fetch(`${API_URL}/admin/clientes`, {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const clientes = await response.json();
+                
+                let html = `
+                    <div class="card">
+                        <h3>Lista de Clientes</h3>
+                        <table>
+                            <thead>
+                                <tr><th>ID</th><th>Nombre</th><th>Usuario</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                clientes.forEach(cliente => {
+                    html += `
+                        <tr>
+                            <td>${cliente.id}</td>
+                            <td>${cliente.nombre}</td>
+                            <td>${cliente.usuario}</td>
+                            <td>${cliente.telefono || '-'}</td>
+                            <td>${cliente.estado || 'Activo'}</td>
+                            <td>
+                                <button onclick="editarAreaCliente(${cliente.id}, '${cliente.nombre}')">✏️ Editar Área</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += `</tbody></table></div>`;
+                document.getElementById('content-area').innerHTML = html;
+            } catch (error) {
+                console.error('Error cargando clientes:', error);
+                document.getElementById('content-area').innerHTML = '<div class="card"><p>Error cargando clientes</p></div>';
+            }
+        }
+        
+        async function editarAreaCliente(id, nombre) {
+            currentClientId = id;
+            document.getElementById('cliente-info').innerHTML = `<strong>Cliente:</strong> ${nombre}`;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/area-cliente/${id}`, {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const data = await response.json();
+                const contenido = data.area?.contenido || {};
+                
+                document.getElementById('area-content').value = typeof contenido === 'object' 
+                    ? JSON.stringify(contenido, null, 2) 
+                    : contenido;
+                    
+                document.getElementById('area-modal').style.display = 'flex';
+            } catch (error) {
+                alert('Error cargando el área: ' + error.message);
+            }
+        }
+        
+        async function saveClientArea() {
+            const contenido = document.getElementById('area-content').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/admin/area-cliente/${currentClientId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ contenido })
+                });
+                
+                if (response.ok) {
+                    alert('✅ Área actualizada correctamente');
+                    closeAreaModal();
+                    loadClientes(); // Recargar lista
+                } else {
+                    alert('Error al guardar');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        function closeAreaModal() {
+            document.getElementById('area-modal').style.display = 'none';
+            currentClientId = null;
+        }
+        
+        async function loadEmpleados() {
+            try {
+                const response = await fetch(`${API_URL}/empleados-completo`, {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const empleados = await response.json();
+                
+                let html = `
+                    <div class="card">
+                        <h3>Lista de Empleados</h3>
+                        <button onclick="crearEmpleado()" style="margin-bottom: 10px;">➕ Nuevo Empleado</button>
+                        <table>
+                            <thead>
+                                <tr><th>ID</th><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                empleados.forEach(emp => {
+                    html += `
+                        <tr>
+                            <td>${emp.id}</td>
+                            <td>${emp.nombre}</td>
+                            <td>${emp.usuario}</td>
+                            <td>${emp.rol || 'empleado'}</td>
+                            <td>${emp.telefono || '-'}</td>
+                            <td>${emp.estado || 'Activo'}</td>
+                            <td><button onclick="eliminarEmpleado(${emp.id})">🗑️ Eliminar</button></td>
+                        </tr>
+                    `;
+                });
+                
+                html += `</tbody></table></div>`;
+                document.getElementById('content-area').innerHTML = html;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        function crearEmpleado() {
+            const nombre = prompt('Nombre completo:');
+            const usuario = prompt('Usuario:');
+            const password = prompt('Contraseña:');
+            const rol = prompt('Rol (admin/empleado/cliente):');
+            
+            if (nombre && usuario && password && rol) {
+                fetch(`${API_URL}/crear-empleado`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ nombre, usuario, password, rol, telefono: '', salario: 0 })
+                }).then(() => {
+                    alert('Empleado creado');
+                    loadEmpleados();
+                }).catch(err => alert('Error: ' + err.message));
+            }
+        }
+        
+        function eliminarEmpleado(id) {
+            if (confirm('¿Eliminar este empleado?')) {
+                fetch(`${API_URL}/eliminar-empleado/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                }).then(() => {
+                    alert('Empleado eliminado');
+                    loadEmpleados();
+                });
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminData');
+            window.location.href = 'inicio.html';
+        }
+        
+        // Cargar clientes por defecto
+        loadClientes();
+    </script>
+</body>
+</html>
