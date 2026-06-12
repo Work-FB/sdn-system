@@ -750,16 +750,17 @@
         }
 
         async function verFactura(id) {
-            try {
-                const response = await fetch(`${API_URL}/api/factura/${id}`, {
-                    headers: { 'Authorization': `Bearer ${usuario.id}` }
-                });
-                const pedido = await response.json();
-                generarFacturaPDF(pedido);
-            } catch (error) {
-                alert('Error cargando la factura');
-            }
-        }
+    try {
+        const response = await fetch(`${API_URL}/api/factura/${id}`, {
+            headers: { 'Authorization': `Bearer ${usuario.id}` }
+        });
+        const pedido = await response.json();
+        generarFacturaPDF(pedido);
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error cargando la factura');
+    }
+}
 
         function generarFacturaPDF(pedido) {
             const productos = typeof pedido.productos === 'string' ? JSON.parse(pedido.productos) : pedido.productos;

@@ -332,12 +332,18 @@ app.put("/admin/pedido-leido/:id", verificarAdmin, async (req, res) => {
 app.get("/api/factura/:id", async (req, res) => {
     const { id } = req.params;
     try {
-        const result = await query(`SELECT * FROM pedidos WHERE id = $1 OR numero_pedido = $1`, [id]);
+        // Buscar por id (número) o por numero_pedido (texto)
+        const result = await query(
+            `SELECT * FROM pedidos WHERE id = $1::int OR numero_pedido = $1::text`,
+            [id]
+        );
+        
         if (result.rows.length === 0) {
             return res.status(404).json({ error: "Factura no encontrada" });
         }
         res.json(result.rows[0]);
     } catch (error) {
+        console.error("Error en factura:", error);
         res.status(500).json({ error: error.message });
     }
 });
