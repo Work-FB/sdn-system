@@ -13,34 +13,6 @@ const PORT = process.env.PORT || 3000;
 // Middlewares
 app.use(cors());
 app.use(express.json());
-
-// ============================================
-// ENDPOINT PÚBLICO PARA EL MENÚ
-// ============================================
-app.get("/public/menus", async (req, res) => {
-    try {
-        // Reutiliza la misma consulta que ya funciona en /menus
-        const result = await query(`
-            SELECT 
-                id, 
-                nombre, 
-                precio, 
-                COALESCE(categoria, 'normales') as categoria,
-                COALESCE(descripcion, 'Delicioso platillo de nuestra cocina') as descripcion,
-                COALESCE(variantes, '["Normal"]') as variantes,
-                imagen
-            FROM menus 
-            WHERE disponible = 1 
-            ORDER BY id DESC
-        `);
-        
-        res.json(result.rows);
-    } catch (error) {
-        console.error("Error en /public/menus:", error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Configuración de multer para imágenes
@@ -85,16 +57,11 @@ const autenticar = async (req, res, next) => {
     }
     
     const token = authHeader.split(' ')[1];
-    if (!token) {
-        return res.status(401).json({ error: "Token inválido" });
-    }
-    
     try {
         const result = await query(`SELECT id, nombre, rol FROM usuarios WHERE id = $1`, [token]);
         if (result.rows.length === 0) {
             return res.status(401).json({ error: "Usuario no encontrado" });
         }
-        
         req.usuario = result.rows[0];
         next();
     } catch (error) {
@@ -120,75 +87,6 @@ const verificarAdmin = async (req, res, next) => {
         res.status(500).json({ error: error.message });
     }
 };
-
-// ============================================
-// ENDPOINTS PARA RECIBIR PEDIDOS
-// ============================================
-
-// Guardar pedido completo en la base de datos
-app.post("/api/guardar-pedido", async (req, res) => {
-    const { cliente, telefono, direccion, metodoPago, total, productos, fecha } = req.body;
-    
-    try {
-        // Crear tabla de pedidos si no existe
-        await query(`
-            CREATE TABLE IF NOT EXISTS pedidos (
-                id SERIAL PRIMARY KEY,
-                numero_pedido TEXT NOT NULL,
-                cliente TEXT NOT NULL,
-                telefono TEXT,
-                direccion TEXT NOT NULL,
-                metodo_pago TEXT NOT NULL,
-                total REAL NOT NULL,
-                productos JSONB NOT NULL,
-                estado TEXT DEFAULT 'pendiente',
-                fecha TEXT NOT NULL,
-                hora TEXT NOT NULL,
-                leido BOOLEAN DEFAULT FALSE
-            )
-        `);
-        
-        const ahora = new Date();
-        const fechaActual = ahora.toLocaleDateString("es-DO", { timeZone: "America/Santo_Domingo" });
-        const horaActual = ahora.toLocaleTimeString("es-DO", { timeZone: "America/Santo_Domingo", hour: "2-digit", minute: "2-digit" });
-        
-        const result = await query(
-            `INSERT INTO pedidos (numero_pedido, cliente, telefono, direccion, metodo_pago, total, productos, fecha, hora)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
-            [Date.now().toString(), cliente, telefono, direccion, metodoPago, total, JSON.stringify(productos), fechaActual, horaActual]
-        );
-        
-        res.json({ success: true, id: result.rows[0].id });
-    } catch (error) {
-        console.error("Error guardando pedido:", error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Obtener pedidos pendientes (para el admin)
-app.get("/admin/pedidos-pendientes", verificarAdmin, async (req, res) => {
-    try {
-        const result = await query(`
-            SELECT * FROM pedidos 
-            WHERE leido = FALSE 
-            ORDER BY id DESC
-        `);
-        res.json(result.rows);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Marcar pedido como leído
-app.put("/admin/pedido-leido/:id", verificarAdmin, async (req, res) => {
-    const { id } = req.params;
-    try {
-        await query(`UPDATE pedidos SET leido = TRUE WHERE id = $1`, [id]);
-        res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
 
 // ============================================
 // INICIALIZAR TABLAS
@@ -278,6 +176,21 @@ const initDB = async () => {
             observacion TEXT
         )`);
 
+        await query(`CREATE TABLE IF NOT EXISTS pedidos (
+            id SERIAL PRIMARY KEY,
+            numero_pedido TEXT NOT NULL,
+            cliente_nombre TEXT NOT NULL,
+            cliente_telefono TEXT,
+            cliente_direccion TEXT NOT NULL,
+            metodo_pago TEXT NOT NULL,
+            total REAL NOT NULL,
+            productos JSONB NOT NULL,
+            estado TEXT DEFAULT 'pendiente',
+            fecha TEXT NOT NULL,
+            hora TEXT NOT NULL,
+            leido BOOLEAN DEFAULT FALSE
+        )`);
+
         console.log("✅ Tablas creadas/verificadas");
     } catch (err) {
         console.error("❌ Error creando tablas:", err);
@@ -334,132 +247,6 @@ app.post("/verify-admin-access", async (req, res) => {
     }
 });
 
-// Endpoint público para el menú (usa tus productos existentes)
-app.get("/public/menus", async (req, res) => {
-    try {
-        const result = await query(`
-            SELECT 
-                id, 
-                nombre, 
-                precio, 
-                COALESCE(categoria, 'normales') as categoria,
-                COALESCE(descripcion, 'Delicioso platillo de nuestra cocina') as descripcion,
-                COALESCE(variantes, '["Normal"]') as variantes,
-                imagen,
-                disponible
-            FROM menus 
-            WHERE disponible = 1 
-            ORDER BY id DESC
-        `);
-        
-        if (result.rows.length === 0) {
-            // Si no hay productos, devolver mensaje claro
-            return res.json([]);
-        }
-        
-        res.json(result.rows);
-    } catch (error) {
-        console.error("Error en /public/menus:", error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// ============================================
-// PEDIDOS - NUEVOS ENDPOINTS
-// ============================================
-
-// Guardar pedido en la base de datos (esto ya lo tienes)
-app.post("/api/guardar-pedido", async (req, res) => {
-    const { cliente, telefono, direccion, metodoPago, total, productos, numeroPedido } = req.body;
-    
-    try {
-        await query(`
-            CREATE TABLE IF NOT EXISTS pedidos (
-                id SERIAL PRIMARY KEY,
-                numero_pedido TEXT NOT NULL,
-                cliente TEXT NOT NULL,
-                telefono TEXT,
-                direccion TEXT NOT NULL,
-                metodo_pago TEXT NOT NULL,
-                total REAL NOT NULL,
-                productos JSONB NOT NULL,
-                estado TEXT DEFAULT 'pendiente',
-                fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
-        
-        await query(
-            `INSERT INTO pedidos (numero_pedido, cliente, telefono, direccion, metodo_pago, total, productos)
-             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-            [numeroPedido, cliente, telefono, direccion, metodoPago, total, JSON.stringify(productos)]
-        );
-        
-        res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Obtener historial de un cliente (por teléfono o nombre)
-app.post("/api/mis-pedidos", async (req, res) => {
-    const { telefono, nombre } = req.body;
-    
-    try {
-        const result = await query(
-            `SELECT * FROM pedidos WHERE telefono = $1 OR cliente = $2 ORDER BY fecha DESC LIMIT 20`,
-            [telefono, nombre]
-        );
-        res.json(result.rows);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// ============================================
-// ENVÍO DE WHATSAPP (WhatsApp Business API)
-// ============================================
-
-const axios = require('axios'); // Asegúrate de tener axios instalado: npm install axios
-
-app.post("/api/enviar-whatsapp", async (req, res) => {
-    const { telefono, mensaje } = req.body;
-    
-    // Variables de entorno (configúralas en Render)
-    const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
-    const WHATSAPP_PHONE_ID = process.env.WHATSAPP_PHONE_ID;
-    
-    // Si no está configurado, usa el método de enlace directo
-    if (!WHATSAPP_TOKEN || !WHATSAPP_PHONE_ID) {
-        // Fallback: devolver la URL para abrir WhatsApp
-        return res.json({ 
-            success: true, 
-            method: 'fallback',
-            url: `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`
-        });
-    }
-    
-    try {
-        const response = await axios({
-            method: 'POST',
-            url: `https://graph.facebook.com/v17.0/${WHATSAPP_PHONE_ID}/messages`,
-            headers: {
-                'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
-                'Content-Type': 'application/json'
-            },
-            data: {
-                messaging_product: 'whatsapp',
-                to: telefono,
-                type: 'text',
-                text: { body: mensaje }
-            }
-        });
-        res.json({ success: true, method: 'api' });
-    } catch (error) {
-        console.error('Error enviando WhatsApp:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // ============================================
 // 2. ENDPOINTS DE AUTENTICACIÓN
 // ============================================
@@ -484,38 +271,77 @@ app.post("/login", async (req, res) => {
     }
 });
 
-
-// ============================================
-// PEDIDOS Y FACTURAS - ENDPOINTS COMPLETOS
-// ============================================
-
-// Crear tabla de pedidos si no existe
-const crearTablaPedidos = async () => {
+app.post("/register", async (req, res) => {
+    const { nombre, usuario, password, rol } = req.body;
     try {
-        await query(`
-            CREATE TABLE IF NOT EXISTS pedidos (
-                id SERIAL PRIMARY KEY,
-                numero_pedido TEXT NOT NULL,
-                cliente_nombre TEXT NOT NULL,
-                cliente_telefono TEXT,
-                cliente_direccion TEXT NOT NULL,
-                metodo_pago TEXT NOT NULL,
-                total REAL NOT NULL,
-                productos JSONB NOT NULL,
-                estado TEXT DEFAULT 'pendiente',
-                fecha TEXT NOT NULL,
-                hora TEXT NOT NULL,
-                leido BOOLEAN DEFAULT FALSE
-            )
-        `);
-        console.log("✅ Tabla pedidos verificada");
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const result = await query(
+            `INSERT INTO usuarios(nombre, usuario, password, rol) VALUES ($1, $2, $3, $4) RETURNING id`,
+            [nombre, usuario, hashedPassword, rol]
+        );
+        res.json({ mensaje: "Usuario registrado", id: result.rows[0].id });
     } catch (error) {
-        console.error("Error creando tabla pedidos:", error);
+        res.status(400).json({ error: error.message });
     }
-};
-crearTablaPedidos();
+});
 
-// Guardar pedido (desde el frontend)
+// ============================================
+// 3. ENDPOINTS DE PEDIDOS (ADMIN)
+// ============================================
+
+app.get("/admin/pedidos", verificarAdmin, async (req, res) => {
+    try {
+        const result = await query(`SELECT * FROM pedidos ORDER BY id DESC`);
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Error obteniendo pedidos:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get("/admin/pedidos-pendientes", verificarAdmin, async (req, res) => {
+    try {
+        const result = await query(`SELECT * FROM pedidos WHERE estado = 'pendiente' ORDER BY id DESC`);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.put("/admin/pedidos/:id/estado", verificarAdmin, async (req, res) => {
+    const { id } = req.params;
+    const { estado } = req.body;
+    try {
+        await query(`UPDATE pedidos SET estado = $1 WHERE id = $2`, [estado, id]);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.put("/admin/pedido-leido/:id", verificarAdmin, async (req, res) => {
+    const { id } = req.params;
+    try {
+        await query(`UPDATE pedidos SET leido = TRUE WHERE id = $1`, [id]);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get("/api/factura/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await query(`SELECT * FROM pedidos WHERE id = $1 OR numero_pedido = $1`, [id]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "Factura no encontrada" });
+        }
+        res.json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.post("/api/guardar-pedido", async (req, res) => {
     const { 
         numero_pedido, 
@@ -544,159 +370,21 @@ app.post("/api/guardar-pedido", async (req, res) => {
     }
 });
 
-// Obtener TODOS los pedidos (para admin)
-app.get("/admin/pedidos", verificarAdmin, async (req, res) => {
+app.post("/api/mis-pedidos", async (req, res) => {
+    const { telefono, nombre } = req.body;
     try {
-        const result = await query(`
-            SELECT * FROM pedidos 
-            ORDER BY id DESC
-        `);
-        res.json(result.rows);
-    } catch (error) {
-        console.error("Error obteniendo pedidos:", error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Obtener pedidos pendientes (admin)
-app.get("/admin/pedidos-pendientes", verificarAdmin, async (req, res) => {
-    try {
-        const result = await query(`
-            SELECT * FROM pedidos 
-            WHERE estado = 'pendiente' 
-            ORDER BY id DESC
-        `);
-        res.json(result.rows);
-    } catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Actualizar estado del pedido
-app.put("/admin/pedidos/:id/estado", verificarAdmin, async (req, res) => {
-    const { id } = req.params;
-    const { estado } = req.body;
-    
-    try {
-        await query(`UPDATE pedidos SET estado = $1 WHERE id = $2`, [estado, id]);
-        res.json({ success: true });
-    } catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Marcar pedido como leído
-app.put("/admin/pedido-leido/:id", verificarAdmin, async (req, res) => {
-    const { id } = req.params;
-    try {
-        await query(`UPDATE pedidos SET leido = TRUE WHERE id = $1`, [id]);
-        res.json({ success: true });
-    } catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Obtener factura por ID
-app.get("/api/factura/:id", async (req, res) => {
-    const { id } = req.params;
-    try {
-        const result = await query(`SELECT * FROM pedidos WHERE id = $1 OR numero_pedido = $1`, [id]);
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: "Factura no encontrada" });
-        }
-        res.json(result.rows[0]);
-    } catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-const nodemailer = require('nodemailer');
-
-// Configurar transporter (usando Gmail como ejemplo)
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,  // Tu correo
-        pass: process.env.EMAIL_PASS   // Contraseña de aplicación
-    }
-});
-
-app.post("/api/enviar-pedido-email", async (req, res) => {
-    const { cliente, telefono, direccion, metodoPago, total, productos, numeroPedido } = req.body;
-    
-    // Crear HTML del correo
-    let productosHTML = '';
-    productos.forEach(item => {
-        productosHTML += `
-            <tr>
-                <td>${item.nombre}</td>
-                <td>${item.cantidad}</td>
-                <td>$${item.precio}</td>
-                <td>$${item.precio * item.cantidad}</td>
-            </tr>
-        `;
-    });
-    
-    const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: 'negocio@sdn.com', // Cambia por el email del negocio
-        subject: `📦 NUEVO PEDIDO #${numeroPedido} - SDN Sazón Doña Nelta`,
-        html: `
-            <h2>🍽️ Nuevo Pedido Recibido</h2>
-            <p><strong>Pedido #:</strong> ${numeroPedido}</p>
-            <p><strong>Cliente:</strong> ${cliente}</p>
-            <p><strong>Teléfono:</strong> ${telefono || 'No especificado'}</p>
-            <p><strong>Dirección:</strong> ${direccion}</p>
-            <p><strong>Método de pago:</strong> ${metodoPago}</p>
-            
-            <h3>📋 Productos:</h3>
-            <table border="1" cellpadding="5">
-                <tr>
-                    <th>Producto</th>
-                    <th>Cantidad</th>
-                    <th>Precio unitario</th>
-                    <th>Subtotal</th>
-                </tr>
-                ${productosHTML}
-                <tr>
-                    <td colspan="3"><strong>TOTAL</strong></td>
-                    <td><strong>$${total}</strong></td>
-                </tr>
-            </table>
-            
-            <p style="margin-top:20px;">🙏 ¡Atender este pedido lo antes posible!</p>
-        `
-    };
-    
-    try {
-        await transporter.sendMail(mailOptions);
-        res.json({ success: true });
-    } catch (error) {
-        console.error("Error enviando email:", error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.post("/register", async (req, res) => {
-    const { nombre, usuario, password, rol } = req.body;
-    try {
-        const hashedPassword = await bcrypt.hash(password, 10);
         const result = await query(
-            `INSERT INTO usuarios(nombre, usuario, password, rol) VALUES ($1, $2, $3, $4) RETURNING id`,
-            [nombre, usuario, hashedPassword, rol]
+            `SELECT * FROM pedidos WHERE cliente_telefono = $1 OR cliente_nombre = $2 ORDER BY id DESC LIMIT 20`,
+            [telefono, nombre]
         );
-        res.json({ mensaje: "Usuario registrado", id: result.rows[0].id });
+        res.json(result.rows);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
 });
 
 // ============================================
-// 3. ENDPOINTS ADMIN (protegidos)
+// 4. ENDPOINTS ADMIN (clientes, empleados, áreas)
 // ============================================
 
 app.get("/admin/clientes", verificarAdmin, async (req, res) => {
@@ -769,10 +457,6 @@ app.delete("/eliminar-empleado/:id", verificarAdmin, async (req, res) => {
     }
 });
 
-// ============================================
-// 4. ENDPOINTS DE ÁREAS (protegidos por autenticación)
-// ============================================
-
 app.get("/api/area-cliente/:id?", autenticar, async (req, res) => {
     const { id: usuarioId, rol } = req.usuario;
     const clienteId = req.params.id || usuarioId;
@@ -796,7 +480,7 @@ app.get("/api/area-cliente/:id?", autenticar, async (req, res) => {
 });
 
 // ============================================
-// 5. ENDPOINTS DE GESTIÓN (menús, productos, etc.)
+// 5. ENDPOINTS DE GESTIÓN (menús, productos, ventas, gastos)
 // ============================================
 
 app.get("/menus", async (req, res) => {
@@ -832,10 +516,6 @@ app.delete("/eliminar-menu/:id", async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
-// ============================================
-// 6. ENDPOINTS DE VENTAS, GASTOS, REPORTES
-// ============================================
 
 app.get("/ventas", async (req, res) => {
     try {
@@ -884,7 +564,7 @@ app.get("/reporte-final", async (req, res) => {
 });
 
 // ============================================
-// 7. ENDPOINTS ÚTILES (admin, utilidades)
+// 6. ENDPOINTS ÚTILES
 // ============================================
 
 app.get("/crear-admin", async (req, res) => {
