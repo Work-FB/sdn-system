@@ -60,7 +60,7 @@
         async function loadUser() {
             const userStr = localStorage.getItem('usuario');
             if (!userStr) {
-                window.location.href = 'login.html';
+                window.location.href = 'admin-login.html';
                 return;
             }
             currentUser = JSON.parse(userStr);
@@ -171,7 +171,7 @@
         // Verificar logout
         function logout() {
             localStorage.removeItem('usuario');
-            window.location.href = 'login.html';
+            window.location.href = 'admin-login.html';
         }
         
         loadUser();
