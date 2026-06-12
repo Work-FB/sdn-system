@@ -60,7 +60,7 @@
         async function loadUser() {
             const userStr = localStorage.getItem('usuario');
             if (!userStr) {
-                window.location.href = 'index.html';
+                window.location.href = 'login.html';
                 return;
             }
             currentUser = JSON.parse(userStr);

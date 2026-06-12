@@ -572,7 +572,7 @@
         // Verificar autenticación
         const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
         if (!usuario.id || usuario.rol !== 'admin') {
-            window.location.href = 'index.html';
+            window.location.href = 'login.html';
         }
         document.getElementById('userName').innerText = usuario.nombre || 'Administrador';
 
@@ -841,7 +841,7 @@
         function logout() {
             localStorage.removeItem('usuario');
             localStorage.removeItem('adminToken');
-            window.location.href = 'index.html';
+            window.location.href = 'login.html';
         }
 
         // Inicializar

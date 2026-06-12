@@ -1,424 +1,1123 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-<title>SDN • Iniciar Sesión</title>
-
-<link rel="preconnect"
-href="https://fonts.googleapis.com">
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-rel="stylesheet">
-
-<style>
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
-body{
-
-    font-family:'Poppins',sans-serif;
-
-    height:100vh;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    background:
-
-    linear-gradient(
-        135deg,
-        #111 0%,
-        #1b1b1b 35%,
-        #2e7d32 100%
-    );
-
-    overflow:hidden;
-
-}
-
-/* FONDO */
-
-.bg-circle{
-
-    position:absolute;
-    border-radius:50%;
-    filter:blur(60px);
-    opacity:0.25;
-
-}
-
-.circle1{
-
-    width:300px;
-    height:300px;
-    background:#4caf50;
-
-    top:-100px;
-    left:-100px;
-
-}
-
-.circle2{
-
-    width:400px;
-    height:400px;
-    background:#d9b382;
-
-    bottom:-150px;
-    right:-100px;
-
-}
-
-/* LOGIN */
-
-.login-container{
-
-    position:relative;
-
-    width:420px;
-
-    background:rgba(255,255,255,0.08);
-
-    backdrop-filter:blur(20px);
-
-    border:1px solid rgba(255,255,255,0.1);
-
-    padding:40px;
-
-    border-radius:35px;
-
-    box-shadow:
-    0 20px 40px rgba(0,0,0,0.35);
-
-    animation:fadeIn 0.8s ease;
-
-}
-
-/* LOGO */
-
-.logo{
-
-    text-align:center;
-    margin-bottom:35px;
-
-}
-
-.logo h1{
-
-    color:white;
-    font-size:42px;
-    font-weight:700;
-
-}
-
-.logo span{
-
-    color:#d9b382;
-
-}
-
-.logo p{
-
-    color:#ccc;
-    margin-top:8px;
-    font-size:15px;
-
-}
-
-/* INPUTS */
-
-.input-group{
-
-    margin-bottom:20px;
-
-}
-
-.input-group label{
-
-    color:white;
-    font-size:14px;
-    margin-bottom:8px;
-    display:block;
-
-}
-
-.input-group input{
-
-    width:100%;
-
-    padding:18px;
-
-    border:none;
-
-    border-radius:18px;
-
-    background:rgba(255,255,255,0.1);
-
-    color:white;
-
-    font-size:16px;
-
-    outline:none;
-
-    transition:0.3s;
-
-}
-
-.input-group input::placeholder{
-
-    color:#ddd;
-
-}
-
-.input-group input:focus{
-
-    background:rgba(255,255,255,0.15);
-
-    transform:scale(1.02);
-
-}
-
-/* BUTTON */
-
-.login-btn{
-
-    width:100%;
-
-    padding:18px;
-
-    border:none;
-
-    border-radius:18px;
-
-    background:#2e7d32;
-
-    color:white;
-
-    font-size:18px;
-
-    font-weight:600;
-
-    cursor:pointer;
-
-    transition:0.3s;
-
-    margin-top:10px;
-
-}
-
-.login-btn:hover{
-
-    background:#388e3c;
-
-    transform:translateY(-2px);
-
-}
-
-/* FOOTER */
-
-.footer{
-
-    text-align:center;
-    margin-top:25px;
-    color:#bbb;
-    font-size:14px;
-
-}
-
-/* ANIMATION */
-
-@keyframes fadeIn{
-
-    from{
-        opacity:0;
-        transform:translateY(20px);
-    }
-
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
-
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="bg-circle circle1"></div>
-<div class="bg-circle circle2"></div>
-
-<div class="login-container">
-
-    <div class="logo">
-
-        <h1>
-             SDN
-            <span>Panel</span>
-        </h1>
-
-        <p>
-            Sazón Doña Nelta
-        </p>
-
-    </div>
-
-    <div class="input-group">
-
-        <label>
-            Usuario
-        </label>
-
-        <input
-            type="text"
-            id="usuario"
-            placeholder="Ingrese su usuario"
-        >
-
-    </div>
-
-    <div class="input-group">
-
-        <label>
-            Contraseña
-        </label>
-
-        <input
-            type="password"
-            id="password"
-            placeholder="Ingrese su contraseña"
-        >
-
-    </div>
-
-    <button
-        class="login-btn"
-        onclick="login()"
-    >
-        Entrar al Sistema
-    </button>
-
-    <div class="footer">
-
-        Sistema Administrativo SDN © 2026
-
-    </div>
-
-</div>
-
-<script>
-
-async function login(){
-
-    const usuario =
-        document.getElementById(
-            "usuario"
-        ).value;
-
-    const password =
-        document.getElementById(
-            "password"
-        ).value;
-
-    try{
-
-        const response = await fetch(
-            "https://sdn-system.onrender.com/login",
-            {
-                method:"POST",
-                headers:{
-                    "Content-Type":"application/json"
-                },
-                body:JSON.stringify({
-                    usuario,
-                    password
-                })
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDN • Sazón Doña Nelta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #111 0%, #1b1b1b 35%, #2e7d32 100%);
+            min-height: 100vh;
+        }
+        
+        .navbar {
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .logo {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .logo span {
+            color: #d9b382;
+        }
+        
+        .search-box {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 12px 45px 12px 20px;
+            border-radius: 25px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+        }
+        
+        .search-box input::placeholder {
+            color: #ccc;
+        }
+        
+        .search-box i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ccc;
+            cursor: pointer;
+        }
+        
+        .header-icons {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .cart-icon, .admin-lock {
+            background: rgba(255,255,255,0.1);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+            color: white;
+            font-size: 20px;
+            position: relative;
+        }
+        
+        .cart-icon:hover, .admin-lock:hover {
+            background: rgba(46,125,50,0.8);
+            transform: scale(1.1);
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff6b6b;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .hero {
+            margin-top: 80px;
+            height: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .carousel-slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+            text-align: center;
+        }
+        
+        .carousel-slide.active {
+            opacity: 1;
+        }
+        
+        .carousel-slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+        
+        .carousel-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .carousel-content h2 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            padding: 15px;
+            cursor: pointer;
+            font-size: 24px;
+            z-index: 10;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .carousel-btn.prev { left: 20px; }
+        .carousel-btn.next { right: 20px; }
+        
+        .carousel-btn:hover {
+            background: rgba(46,125,50,0.8);
+        }
+        
+        .categories {
+            padding: 40px 20px;
+            background: rgba(0,0,0,0.3);
+        }
+        
+        .categories-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .category-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px 25px;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .category-btn.active, .category-btn:hover {
+            background: #2e7d32;
+            transform: translateY(-2px);
+        }
+        
+        .productos-section {
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .section-title {
+            text-align: center;
+            color: white;
+            font-size: 36px;
+            margin-bottom: 40px;
+        }
+        
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .producto-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: 0.3s;
+            color: white;
+        }
+        
+        .producto-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255,255,255,0.12);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .producto-imagen {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .producto-info {
+            padding: 20px;
+        }
+        
+        .producto-info h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .producto-descripcion {
+            color: #ccc;
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .producto-precio {
+            font-size: 28px;
+            color: #4caf50;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .btn-comprar {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+        
+        .btn-comprar:hover {
+            background: #388e3c;
+            transform: scale(1.02);
+        }
+        
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(20px);
+            z-index: 2000;
+            transition: 0.3s;
+            padding: 20px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cart-sidebar.open {
+            right: 0;
+        }
+        
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .close-cart {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .cart-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .cart-item-info {
+            flex: 1;
+        }
+        
+        .cart-item-info h4 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .cart-item-price {
+            color: #4caf50;
+        }
+        
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .cart-item-quantity button {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .cart-total {
+            padding: 20px 0;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            text-align: center;
+        }
+        
+        .cart-total h3 {
+            margin-bottom: 15px;
+        }
+        
+        .checkout-btn {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            width: 100%;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #ccc;
+            background: rgba(0,0,0,0.5);
+            margin-top: 40px;
+        }
+        
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
             }
-        );
-
-        const data =
-            await response.json();
-
-        if(data.mensaje){
-
-            localStorage.setItem(
-                "usuario",
-                JSON.stringify(data.usuario)
+            .search-box {
+                max-width: 100%;
+            }
+            .cart-sidebar {
+                width: 100%;
+                right: -100%;
+            }
+            .hero {
+                height: 300px;
+                margin-top: 180px;
+            }
+            .carousel-content h2 {
+                font-size: 28px;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .producto-card {
+            animation: fadeIn 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">SDN <span>Sazón Doña Nelta</span></div>
+        
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Buscar productos..." onkeyup="filtrarProductos()">
+            <i class="fas fa-search"></i>
+        </div>
+        
+        <div class="header-icons">
+            <div class="cart-icon" onclick="toggleCart()">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count" id="cartCount">0</span>
+            </div>
+            <div class="cart-icon" onclick="mostrarHistorialPedidos()" style="background:rgba(255,255,255,0.1);">
+                <i class="fas fa-history"></i>
+            </div>
+            <div class="admin-lock" onclick="abrirModalSeguridad()">
+                <i class="fas fa-lock"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div id="securityModal" class="security-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:3000; justify-content:center; align-items:center;">
+        <div style="background:rgba(30,30,30,0.95); border-radius:30px; padding:40px; width:90%; max-width:400px; text-align:center;">
+            <h2 style="color:white;">🔐 Acceso Restringido</h2>
+            <p style="color:#ccc; margin:15px 0;">Ingresa la contraseña de administrador</p>
+            <input type="password" id="securityPassword" style="width:100%; padding:15px; border-radius:15px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); color:white; margin-bottom:20px;">
+            <div id="errorMsg" style="color:#ff6b6b; display:none;">❌ Contraseña incorrecta</div>
+            <button onclick="verificarPassword()" style="background:#2e7d32; color:white; border:none; padding:12px; border-radius:15px; width:100%; margin-top:10px;">Verificar Acceso</button>
+            <button onclick="cerrarModalSeguridad()" style="background:rgba(255,255,255,0.1); color:white; border:none; padding:12px; border-radius:15px; width:100%; margin-top:10px;">Cancelar</button>
+        </div>
+    </div>
+    
+    <div class="hero">
+        <div class="carousel-container">
+            <div class="carousel-slide active" style="background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200');">
+                <div class="carousel-content">
+                    <h2>Comida Dominicana</h2>
+                    <p>Sabores auténticos que enamoran</p>
+                </div>
+            </div>
+            <div class="carousel-slide" style="background-image: url('https://images.unsplash.com/photo-1559314809-0d155014e29e?w=1200');">
+                <div class="carousel-content">
+                    <h2>Platos Especiales</h2>
+                    <p>Para los amantes del buen sabor</p>
+                </div>
+            </div>
+            <div class="carousel-slide" style="background-image: url('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=1200');">
+                <div class="carousel-content">
+                    <h2>Combos Familiares</h2>
+                    <p>Comparte con los tuyos</p>
+                </div>
+            </div>
+            <button class="carousel-btn prev" onclick="prevSlide()">❮</button>
+            <button class="carousel-btn next" onclick="nextSlide()">❯</button>
+        </div>
+    </div>
+    
+    <div class="categories">
+        <div class="categories-container">
+            <button class="category-btn active" onclick="filtrarPorCategoria('todos')">📋 Todos</button>
+            <button class="category-btn" onclick="filtrarPorCategoria('populares')">⭐ Populares</button>
+            <button class="category-btn" onclick="filtrarPorCategoria('especiales')">✨ Especiales</button>
+            <button class="category-btn" onclick="filtrarPorCategoria('combos')">🍽️ Combos</button>
+            <button class="category-btn" onclick="filtrarPorCategoria('normales')">🍛 Normales</button>
+        </div>
+    </div>
+    
+    <div class="productos-section">
+        <div class="container">
+            <h2 class="section-title">🍽️ Nuestro Menú</h2>
+            <div id="menu-container" class="menu-grid">
+                <div style="text-align:center; color:white;">Cargando deliciosas opciones...</div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="cartSidebar" class="cart-sidebar">
+        <div class="cart-header">
+            <h3><i class="fas fa-shopping-cart"></i> Mi Pedido</h3>
+            <button class="close-cart" onclick="toggleCart()">✕</button>
+        </div>
+        <div id="cartItems" class="cart-items">
+            <p style="text-align:center;">Carrito vacío</p>
+        </div>
+        <div class="cart-total">
+            <h3>Total: $<span id="cartTotal">0</span></h3>
+            <button class="checkout-btn" onclick="checkout()">✅ Confirmar Pedido</button>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Sistema Administrativo SDN © 2026 - Todos los derechos reservados</p>
+        <p style="font-size: 12px; margin-top: 10px;">Sazón, tradición y calidad</p>
+    </div>
+    
+    <script>
+        const API_URL = 'https://sdn-system.onrender.com';
+        let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+        let productos = [];
+        let categoriaActual = 'todos';
+        
+        // Variables candado
+        let intentos = 0;
+        let bloqueadoHasta = 0;
+        const CONTRASENA_CANDADO = '4321';
+        
+        // Carrusel
+        let slideIndex = 0;
+        const slides = document.querySelectorAll('.carousel-slide');
+        
+        function showSlide(n) {
+            if (slides.length === 0) return;
+            slides.forEach(slide => slide.classList.remove('active'));
+            slideIndex = (n + slides.length) % slides.length;
+            slides[slideIndex].classList.add('active');
+        }
+        
+        function nextSlide() { showSlide(slideIndex + 1); }
+        function prevSlide() { showSlide(slideIndex - 1); }
+        
+        if (slides.length > 0) {
+            setInterval(() => nextSlide(), 5000);
+        }
+        
+        // Funciones del candado
+        function abrirModalSeguridad() {
+            if (bloqueadoHasta > Date.now()) {
+                alert(`🔒 Bloqueado. Espera ${Math.ceil((bloqueadoHasta - Date.now()) / 1000)} segundos.`);
+                return;
+            }
+            document.getElementById('securityModal').style.display = 'flex';
+            document.getElementById('securityPassword').value = '';
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+        
+        function cerrarModalSeguridad() {
+            document.getElementById('securityModal').style.display = 'none';
+        }
+        
+        function verificarPassword() {
+            const password = document.getElementById('securityPassword').value;
+            
+            if (password === CONTRASENA_CANDADO) {
+                intentos = 0;
+                cerrarModalSeguridad();
+                window.location.href = 'login.html';
+            } else {
+                intentos++;
+                if (intentos >= 5) {
+                    bloqueadoHasta = Date.now() + 30000;
+                    alert('🚫 5 intentos fallidos. Bloqueado 30 segundos.');
+                    cerrarModalSeguridad();
+                    intentos = 0;
+                } else {
+                    const errorMsg = document.getElementById('errorMsg');
+                    errorMsg.textContent = `❌ Contraseña incorrecta (Intento ${intentos}/5)`;
+                    errorMsg.style.display = 'block';
+                    document.getElementById('securityPassword').value = '';
+                    document.getElementById('securityPassword').focus();
+                }
+            }
+        }
+        
+        // Cargar productos desde la BD
+        async function cargarProductos() {
+            try {
+                const response = await fetch(`${API_URL}/menus`);
+                if (!response.ok) throw new Error('Error cargando productos');
+                
+                productos = await response.json();
+                productos = productos.filter(p => p.disponible === 1 || p.disponible === true);
+                
+                if (productos.length === 0) {
+                    document.getElementById('menu-container').innerHTML = `
+                        <div style="text-align:center; color:white; grid-column:1/-1; padding:50px;">
+                            🍽️ No hay productos disponibles en este momento
+                        </div>`;
+                    return;
+                }
+                
+                mostrarProductos();
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('menu-container').innerHTML = `
+                    <div style="text-align:center; color:white; grid-column:1/-1; padding:50px;">
+                        ❌ Error cargando el menú. Intenta de nuevo más tarde.
+                    </div>`;
+            }
+        }
+        
+        function mostrarProductos() {
+            let productosFiltrados = productos.filter(p => {
+                if (categoriaActual !== 'todos' && p.categoria !== categoriaActual) return false;
+                const busqueda = document.getElementById('searchInput').value.toLowerCase();
+                if (busqueda && !p.nombre.toLowerCase().includes(busqueda)) return false;
+                return true;
+            });
+            
+            const container = document.getElementById('menu-container');
+            
+            if (productosFiltrados.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:white; grid-column:1/-1;">No hay productos en esta categoría</div>';
+                return;
+            }
+            
+            container.innerHTML = productosFiltrados.map(p => `
+                <div class="producto-card">
+                    ${p.imagen ? 
+                        `<img src="${API_URL}/uploads/${p.imagen}" class="producto-imagen" alt="${p.nombre}">` : 
+                        `<div class="producto-imagen" style="background: linear-gradient(135deg, #2e7d32, #1b5e20); display:flex; align-items:center; justify-content:center; height:200px;">
+                            <i class="fas fa-utensils" style="font-size:50px; color:white;"></i>
+                        </div>`
+                    }
+                    <div class="producto-info">
+                        <h3>${p.nombre}</h3>
+                        <p class="producto-descripcion">${p.descripcion || 'Delicioso platillo de nuestra cocina'}</p>
+                        <div class="producto-precio">$${p.precio}</div>
+                        <button class="btn-comprar" onclick="agregarAlCarrito(${p.id}, '${p.nombre}', ${p.precio})">
+                            🛒 Agregar al Carrito
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Carrito
+        function actualizarCarrito() {
+            localStorage.setItem('carrito', JSON.stringify(carrito));
+            const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
+            const cartCount = document.getElementById('cartCount');
+            if (cartCount) cartCount.textContent = totalItems;
+            
+            const cartItemsDiv = document.getElementById('cartItems');
+            const cartTotalSpan = document.getElementById('cartTotal');
+            
+            if (!cartItemsDiv) return;
+            
+            if (carrito.length === 0) {
+                cartItemsDiv.innerHTML = '<p style="text-align:center;">Carrito vacío</p>';
+                if (cartTotalSpan) cartTotalSpan.textContent = '0';
+                return;
+            }
+            
+            let total = 0;
+            cartItemsDiv.innerHTML = carrito.map((item, idx) => {
+                const subtotal = item.precio * item.cantidad;
+                total += subtotal;
+                return `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <h4>${item.nombre}</h4>
+                            <div class="cart-item-price">$${item.precio} c/u</div>
+                            <div class="cart-item-quantity">
+                                <button onclick="modificarCantidad(${idx}, -1)">-</button>
+                                <span>${item.cantidad}</span>
+                                <button onclick="modificarCantidad(${idx}, 1)">+</button>
+                                <button onclick="eliminarDelCarrito(${idx})" style="background:#ff6b6b;">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            if (cartTotalSpan) cartTotalSpan.textContent = total;
+        }
+        
+        function agregarAlCarrito(id, nombre, precio) {
+            const existente = carrito.find(item => item.id === id);
+            if (existente) {
+                existente.cantidad++;
+            } else {
+                carrito.push({ id, nombre, precio, cantidad: 1 });
+            }
+            actualizarCarrito();
+            mostrarNotificacion(`✅ ${nombre} agregado al carrito`, 'success');
+        }
+        
+        function modificarCantidad(idx, cambio) {
+            const nuevoCantidad = carrito[idx].cantidad + cambio;
+            if (nuevoCantidad <= 0) {
+                carrito.splice(idx, 1);
+            } else {
+                carrito[idx].cantidad = nuevoCantidad;
+            }
+            actualizarCarrito();
+        }
+        
+        function eliminarDelCarrito(idx) {
+            carrito.splice(idx, 1);
+            actualizarCarrito();
+        }
+        
+        function toggleCart() {
+            const sidebar = document.getElementById('cartSidebar');
+            if (sidebar) sidebar.classList.toggle('open');
+        }
+        
+        function mostrarNotificacion(mensaje, tipo = 'success') {
+            const notif = document.createElement('div');
+            notif.textContent = mensaje;
+            const color = tipo === 'success' ? '#2e7d32' : '#ff6b6b';
+            notif.style.cssText = `position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:${color}; color:white; padding:12px 24px; border-radius:25px; z-index:5000; animation:fadeIn 0.3s ease; font-family:'Poppins',sans-serif;`;
+            document.body.appendChild(notif);
+            setTimeout(() => notif.remove(), 3000);
+        }
+        
+        // CHECKOUT
+        async function checkout() {
+            if (carrito.length === 0) {
+                mostrarNotificacion('🛒 El carrito está vacío', 'error');
+                return;
+            }
+            
+            let total = 0;
+            carrito.forEach(item => total += item.precio * item.cantidad);
+            mostrarModalConfirmacion(total);
+        }
+        
+        function mostrarModalConfirmacion(total) {
+            let productosHTML = '';
+            carrito.forEach(item => {
+                productosHTML += `
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                        <span>${item.nombre} x${item.cantidad}</span>
+                        <span>$${item.precio * item.cantidad}</span>
+                    </div>
+                `;
+            });
+            
+            const modalHTML = `
+                <div id="confirmModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:4000; display:flex; justify-content:center; align-items:center; overflow:auto;">
+                    <div style="background:white; border-radius:20px; max-width:550px; width:90%; max-height:85vh; overflow:auto; padding:25px; font-family:'Poppins',sans-serif;">
+                        <h2 style="color:#2e7d32; margin-bottom:15px;">✅ Confirmar Pedido</h2>
+                        
+                        <div style="margin:15px 0;">
+                            <strong>📋 Productos:</strong>
+                            <div style="margin-top:10px; background:#f9f9f9; padding:10px; border-radius:10px;">
+                                ${productosHTML}
+                            </div>
+                        </div>
+                        
+                        <div style="font-size:20px; font-weight:bold; margin:15px 0; text-align:right; border-top:2px solid #2e7d32; padding-top:10px;">
+                            Total: $${total}
+                        </div>
+                        
+                        <div style="margin:15px 0;">
+                            <label style="display:block; margin-bottom:5px;"><strong>👤 Nombre completo:</strong></label>
+                            <input type="text" id="clienteNombre" placeholder="Ej: Juan Pérez" style="width:100%; padding:12px; border-radius:10px; border:1px solid #ddd;">
+                        </div>
+                        
+                        <div style="margin:15px 0;">
+                            <label style="display:block; margin-bottom:5px;"><strong>📞 Teléfono:</strong></label>
+                            <input type="tel" id="clienteTelefono" placeholder="Ej: 809-555-1234" style="width:100%; padding:12px; border-radius:10px; border:1px solid #ddd;">
+                        </div>
+                        
+                        <div style="margin:15px 0;">
+                            <label style="display:block; margin-bottom:5px;"><strong>📍 Dirección de entrega:</strong></label>
+                            <input type="text" id="clienteDireccion" placeholder="Calle, número, sector, referencia" style="width:100%; padding:12px; border-radius:10px; border:1px solid #ddd;">
+                            <small style="color:#666;">Completa para que podamos entregarte</small>
+                        </div>
+                        
+                        <div style="margin:15px 0;">
+                            <label style="display:block; margin-bottom:5px;"><strong>💳 Método de pago:</strong></label>
+                            <select id="metodoPago" style="width:100%; padding:12px; border-radius:10px; border:1px solid #ddd;">
+                                <option value="efectivo">💵 Efectivo (contra entrega)</option>
+                                <option value="transferencia">🏦 Transferencia bancaria</option>
+                                <option value="yape">📱 Yape/Plin</option>
+                            </select>
+                        </div>
+                        
+                        <div id="instruccionesPago" style="margin:10px 0; padding:10px; background:#e8f5e9; border-radius:10px; font-size:12px; display:none;"></div>
+                        
+                        <div style="display:flex; gap:10px; margin-top:20px;">
+                            <button onclick="confirmarPedido()" style="flex:1; background:#2e7d32; color:white; padding:14px; border:none; border-radius:10px; cursor:pointer; font-weight:bold;">✅ Confirmar Pedido</button>
+                            <button onclick="cerrarModalConfirmacion()" style="flex:1; background:#ccc; color:#333; padding:14px; border:none; border-radius:10px; cursor:pointer;">❌ Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const modalExistente = document.getElementById('confirmModal');
+            if (modalExistente) modalExistente.remove();
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            const selectPago = document.getElementById('metodoPago');
+            const instruccionesDiv = document.getElementById('instruccionesPago');
+            
+            selectPago.addEventListener('change', function() {
+                const instrucciones = {
+                    'efectivo': '💵 Pagarás en efectivo al recibir tu pedido. Ten el monto exacto si es posible.',
+                    'transferencia': '🏦 Banco: Reservas | Cuenta: 123-456789-0 | A nombre: SDN Sazón Doña Nelta. Envía el comprobante por WhatsApp.',
+                    'yape': '📱 Yape al 849-751-8898 (SDN Restaurante). Indica tu nombre en el mensaje.'
+                };
+                instruccionesDiv.innerHTML = `<strong>ℹ️ Instrucciones:</strong> ${instrucciones[selectPago.value] || ''}`;
+                instruccionesDiv.style.display = 'block';
+            });
+            selectPago.dispatchEvent(new Event('change'));
+        }
+        
+        function cerrarModalConfirmacion() {
+            const modal = document.getElementById('confirmModal');
+            if (modal) modal.remove();
+        }
+        
+        async function confirmarPedido() {
+            const clienteNombre = document.getElementById('clienteNombre')?.value || 'Cliente';
+            const clienteTelefono = document.getElementById('clienteTelefono')?.value || '';
+            const clienteDireccion = document.getElementById('clienteDireccion')?.value || '';
+            const metodoPago = document.getElementById('metodoPago')?.value || 'efectivo';
+            
+            if (!clienteDireccion) {
+                mostrarNotificacion('⚠️ Por favor, ingresa tu dirección de entrega', 'error');
+                return;
+            }
+            
+            let total = 0;
+            carrito.forEach(item => total += item.precio * item.cantidad);
+            
+            // Registrar ventas
+            for (const item of carrito) {
+                try {
+                    await fetch(`${API_URL}/public/venta-rapida`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            producto: item.nombre,
+                            cantidad: item.cantidad,
+                            precio: item.precio
+                        })
+                    });
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+            
+            const pedido = {
+                id: Date.now(),
+                fecha: new Date().toLocaleString(),
+                cliente: clienteNombre,
+                telefono: clienteTelefono,
+                direccion: clienteDireccion,
+                metodoPago: metodoPago,
+                total: total,
+                productos: [...carrito],
+                estado: 'pendiente'
+            };
+            
+            // Guardar en historial
+            const historial = JSON.parse(localStorage.getItem('historialPedidos') || '[]');
+            historial.unshift(pedido);
+            localStorage.setItem('historialPedidos', JSON.stringify(historial.slice(0, 20)));
+            
+            // Mensaje WhatsApp
+            const mensajeAdmin = generarMensajeWhatsAppAdmin(pedido);
+            
+            const enviarWhatsApp = confirm(
+                `📱 ¿Notificar al restaurante por WhatsApp?\n\n` +
+                `Al confirmar, se abrirá WhatsApp con el mensaje del pedido.\n` +
+                `Solo debes presionar ENVIAR para que el restaurante reciba tu pedido.\n\n` +
+                `¿Deseas continuar?`
             );
-
-            const boton =
-                document.querySelector(
-                    ".login-btn"
-                );
-
-            boton.innerText =
-                "Entrando...";
-
-            boton.style.background =
-                "#4caf50";
-
-            setTimeout(() => {
-
-                window.location.href =
-                    "dashboard.html";
-
-            },1000);
-
-        }else{
-
-            alert(data.error);
-
+            
+            if (enviarWhatsApp) {
+                const telefonoNegocio = '8497518898';
+                const mensajeCodificado = encodeURIComponent(mensajeAdmin);
+                window.open(`https://wa.me/${telefonoNegocio}?text=${mensajeCodificado}`, '_blank');
+                mostrarNotificacion('📱 Se abrió WhatsApp. Presiona ENVIAR para notificar al restaurante.', 'success');
+            }
+            
+            await guardarPedidoEnBD(pedido);
+            
+            mostrarNotificacion(`✅ Pedido #${pedido.id} confirmado! Total: $${total}`, 'success');
+            
+            carrito = [];
+            actualizarCarrito();
+            cerrarModalConfirmacion();
+            toggleCart();
+        }
+        
+        function generarMensajeWhatsAppAdmin(pedido) {
+            let mensaje = `🍽️ *NUEVO PEDIDO - SDN Sazón Doña Nelta* 🍽️\n\n`;
+            mensaje += `📅 *Fecha:* ${pedido.fecha}\n`;
+            mensaje += `🆔 *Pedido #:* ${pedido.id}\n\n`;
+            mensaje += `👤 *Cliente:* ${pedido.cliente}\n`;
+            if (pedido.telefono) mensaje += `📞 *Teléfono:* ${pedido.telefono}\n`;
+            mensaje += `📍 *Dirección:* ${pedido.direccion}\n`;
+            mensaje += `💳 *Método de pago:* ${getNombreMetodoPago(pedido.metodoPago)}\n\n`;
+            mensaje += `*📋 DETALLE DEL PEDIDO:*\n`;
+            mensaje += `━━━━━━━━━━━━━━━━━━━━━\n`;
+            
+            pedido.productos.forEach(item => {
+                mensaje += `• ${item.nombre} x${item.cantidad} = $${item.precio * item.cantidad}\n`;
+            });
+            
+            mensaje += `━━━━━━━━━━━━━━━━━━━━━\n`;
+            mensaje += `💰 *TOTAL: $${pedido.total}*\n\n`;
+            mensaje += `🙏 ¡Gracias por tu preferencia!`;
+            
+            return mensaje;
+        }
+        
+        function getNombreMetodoPago(metodo) {
+            const metodos = {
+                'efectivo': 'Efectivo (contra entrega)',
+                'transferencia': 'Transferencia bancaria',
+                'yape': 'Yape/Plin'
+            };
+            return metodos[metodo] || metodo;
+        }
+        
+        function imprimirTicket(pedido) {
+            const fechaActual = new Date().toLocaleString();
+            
+            const contenidoTicket = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Ticket #${pedido.id}</title>
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body { font-family: 'Courier New', monospace; width: 300px; margin: 0 auto; padding: 15px; background: white; }
+                        .ticket { border: 1px solid #ddd; padding: 15px; border-radius: 10px; }
+                        .header { text-align: center; border-bottom: 2px dashed #333; padding-bottom: 12px; margin-bottom: 12px; }
+                        .header h1 { font-size: 20px; color: #2e7d32; }
+                        .header p { font-size: 10px; color: #666; }
+                        .info-cliente { background: #f5f5f5; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 10px; }
+                        .pedido-title { text-align: center; background: #2e7d32; color: white; padding: 5px; border-radius: 5px; margin: 10px 0; font-size: 12px; }
+                        .producto-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dotted #ccc; font-size: 11px; }
+                        .total { margin-top: 12px; padding-top: 10px; border-top: 2px dashed #333; text-align: right; font-weight: bold; }
+                        .metodo-pago { background: #e8f5e9; padding: 8px; border-radius: 5px; margin: 10px 0; text-align: center; font-size: 10px; }
+                        .footer { text-align: center; margin-top: 15px; padding-top: 10px; border-top: 2px dashed #333; font-size: 9px; }
+                        .gracias { text-align: center; margin-top: 10px; font-weight: bold; color: #2e7d32; }
+                    </style>
+                </head>
+                <body>
+                    <div class="ticket">
+                        <div class="header">
+                            <h1>SDN Sazón Doña Nelta</h1>
+                            <p>📞 809-555-1234 | 📍 Santo Domingo</p>
+                            <p>📅 ${fechaActual}</p>
+                        </div>
+                        <div class="info-cliente">
+                            <p><strong>Pedido #${pedido.id}</strong></p>
+                            <p>👤 ${pedido.cliente} | 📞 ${pedido.telefono || 'N/A'}</p>
+                            <p>📍 ${pedido.direccion}</p>
+                        </div>
+                        <div class="pedido-title">📋 DETALLE DEL PEDIDO</div>
+                        ${pedido.productos.map(item => `
+                            <div class="producto-item">
+                                <span>${item.nombre} x${item.cantidad}</span>
+                                <span>$${item.precio * item.cantidad}</span>
+                            </div>
+                        `).join('')}
+                        <div class="total">TOTAL: $${pedido.total}</div>
+                        <div class="metodo-pago">💳 ${getNombreMetodoPago(pedido.metodoPago)}</div>
+                        <div class="footer">🕐 Tiempo estimado: 30-45 min | 💵 Pago contra entrega</div>
+                        <div class="gracias">¡Gracias por tu preferencia! 🙏</div>
+                    </div>
+                    <script>window.print(); setTimeout(() => window.close(), 1000);<\/script>
+                </body>
+                </html>
+            `;
+            
+            const ventanaImpresion = window.open('', '_blank');
+            ventanaImpresion.document.write(contenidoTicket);
+            ventanaImpresion.document.close();
+        }
+        
+        function mostrarHistorialPedidos() {
+            const historial = JSON.parse(localStorage.getItem('historialPedidos') || '[]');
+            
+            if (historial.length === 0) {
+                mostrarNotificacion('No tienes pedidos anteriores', 'error');
+                return;
+            }
+            
+            let historialHTML = `
+                <div id="historialModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:4000; display:flex; justify-content:center; align-items:center;">
+                    <div style="background:white; border-radius:20px; max-width:500px; width:90%; max-height:80vh; overflow:auto; padding:20px;">
+                        <h2 style="color:#2e7d32;">📋 Mis Pedidos</h2>
+                        ${historial.map(pedido => `
+                            <div style="border:1px solid #ddd; border-radius:10px; padding:10px; margin-bottom:10px;">
+                                <div style="display:flex; justify-content:space-between;">
+                                    <strong>#${pedido.id}</strong>
+                                    <strong>$${pedido.total}</strong>
+                                </div>
+                                <div style="font-size:12px;">📅 ${pedido.fecha}</div>
+                                <div style="font-size:12px;">📍 ${pedido.direccion}</div>
+                                <div style="font-size:11px; margin-top:5px;">${pedido.productos.map(p => `${p.nombre} x${p.cantidad}`).join(', ')}</div>
+                            </div>
+                        `).join('')}
+                        <button onclick="borrarHistorialLocal()" style="background:#ff6b6b; color:white; padding:10px; border:none; border-radius:10px; width:100%; margin-top:10px;">🗑️ Borrar Historial</button>
+                        <button onclick="cerrarHistorial()" style="background:#2e7d32; color:white; padding:10px; border:none; border-radius:10px; width:100%; margin-top:5px;">Cerrar</button>
+                    </div>
+                </div>
+            `;
+            
+            const modalExistente = document.getElementById('historialModal');
+            if (modalExistente) modalExistente.remove();
+            document.body.insertAdjacentHTML('beforeend', historialHTML);
+        }
+        
+        function borrarHistorialLocal() {
+            if (confirm('¿Borrar TODO tu historial de pedidos?')) {
+                localStorage.removeItem('historialPedidos');
+                cerrarHistorial();
+                mostrarNotificacion('🗑️ Historial borrado', 'success');
+            }
+        }
+        
+        function cerrarHistorial() {
+            const modal = document.getElementById('historialModal');
+            if (modal) modal.remove();
+        }
+        
+        function filtrarProductos() { mostrarProductos(); }
+        
+        function filtrarPorCategoria(cat) {
+            categoriaActual = cat;
+            const btns = document.querySelectorAll('.category-btn');
+            btns.forEach(btn => btn.classList.remove('active'));
+            if (event && event.target) event.target.classList.add('active');
+            mostrarProductos();
         }
 
-    }catch(error){
-
-        alert(
-            "Error conectando con el servidor"
-        );
-
-        console.log(error);
-
-    }
-
-}
-
-// Al recibir respuesta del login
-fetch(`${API_URL}/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ usuario, password })
-})
-.then(res => res.json())
-.then(data => {
-    if (data.usuario) {
-        localStorage.setItem('usuario', JSON.stringify(data.usuario));
-        // Redirigir según rol
-        if (data.usuario.rol === 'admin') {
-            window.location.href = 'dashboard.html';
-        } else if (data.usuario.rol === 'cliente') {
-            window.location.href = 'area-cliente.html';
+        // Guardar pedido en la base de datos (backend)
+async function guardarPedidoEnBD(pedido) {
+    const ahora = new Date();
+    const fecha = ahora.toLocaleDateString("es-DO");
+    const hora = ahora.toLocaleTimeString("es-DO");
+    
+    try {
+        const response = await fetch(`${API_URL}/api/guardar-pedido`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                numero_pedido: pedido.id.toString(),
+                cliente_nombre: pedido.cliente,
+                cliente_telefono: pedido.telefono,
+                cliente_direccion: pedido.direccion,
+                metodo_pago: pedido.metodoPago,
+                total: pedido.total,
+                productos: pedido.productos,
+                fecha: fecha,
+                hora: hora
+            })
+        });
+        
+        if (response.ok) {
+            console.log('✅ Pedido guardado en la BD');
         } else {
-            window.location.href = 'dashboard.html'; // tus empleados normales
+            console.error('Error guardando pedido en BD');
         }
+    } catch (error) {
+        console.error('Error:', error);
     }
-});
+}
+        
+        // Inicializar
+        cargarProductos();
+        actualizarCarrito();
+        
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', filtrarProductos);
+        }
 
-</script>
 
+    </script>
 </body>
-</html>
+</html> 
