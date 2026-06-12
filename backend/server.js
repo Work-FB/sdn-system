@@ -480,27 +480,6 @@ app.delete("/eliminar-empleado/:id", verificarAdmin, async (req, res) => {
     }
 });
 
-app.get("/api/area-cliente/:id?", autenticar, async (req, res) => {
-    const { id: usuarioId, rol } = req.usuario;
-    const clienteId = req.params.id || usuarioId;
-    
-    if (rol !== 'admin' && parseInt(clienteId) !== usuarioId) {
-        return res.status(403).json({ error: "No tienes permiso" });
-    }
-    
-    try {
-        let area = await query(`SELECT * FROM areas_clientes WHERE usuario_id = $1`, [clienteId]);
-        
-        if (area.rows.length === 0) {
-            await query(`INSERT INTO areas_clientes(usuario_id, contenido) VALUES ($1, $2)`, [clienteId, JSON.stringify({})]);
-            area = await query(`SELECT * FROM areas_clientes WHERE usuario_id = $1`, [clienteId]);
-        }
-        
-        res.json({ area: area.rows[0] });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
 
 // ============================================
 // 5. ENDPOINTS DE GESTIÓN (menús, productos, ventas, gastos)
