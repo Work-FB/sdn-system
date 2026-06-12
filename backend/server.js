@@ -403,19 +403,42 @@ app.get("/admin/clientes", verificarAdmin, async (req, res) => {
     }
 });
 
-app.put("/admin/area-cliente/:id", verificarAdmin, async (req, res) => {
-    const clienteId = req.params.id;
-    const { contenido } = req.body;
+// Obtener área del cliente autenticado
+app.get("/api/area-cliente", autenticar, async (req, res) => {
+    const { id: usuarioId, rol } = req.usuario;
     
     try {
-        await query(
-            `INSERT INTO areas_clientes(usuario_id, contenido, actualizado_por, actualizado_en)
-             VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
-             ON CONFLICT (usuario_id) 
-             DO UPDATE SET contenido = $2, actualizado_por = $3, actualizado_en = CURRENT_TIMESTAMP`,
-            [clienteId, JSON.stringify(contenido), req.admin.id]
-        );
-        res.json({ mensaje: "Área actualizada correctamente" });
+        let area = await query(`SELECT * FROM areas_clientes WHERE usuario_id = $1`, [usuarioId]);
+        
+        if (area.rows.length === 0) {
+            await query(`INSERT INTO areas_clientes(usuario_id, contenido) VALUES ($1, $2)`, [usuarioId, JSON.stringify({})]);
+            area = await query(`SELECT * FROM areas_clientes WHERE usuario_id = $1`, [usuarioId]);
+        }
+        
+        res.json({ area: area.rows[0] });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Obtener área de un cliente específico (solo admin)
+app.get("/api/area-cliente/:id", autenticar, async (req, res) => {
+    const { id: usuarioId, rol } = req.usuario;
+    const clienteId = req.params.id;
+    
+    if (rol !== 'admin' && parseInt(clienteId) !== usuarioId) {
+        return res.status(403).json({ error: "No tienes permiso" });
+    }
+    
+    try {
+        let area = await query(`SELECT * FROM areas_clientes WHERE usuario_id = $1`, [clienteId]);
+        
+        if (area.rows.length === 0) {
+            await query(`INSERT INTO areas_clientes(usuario_id, contenido) VALUES ($1, $2)`, [clienteId, JSON.stringify({})]);
+            area = await query(`SELECT * FROM areas_clientes WHERE usuario_id = $1`, [clienteId]);
+        }
+        
+        res.json({ area: area.rows[0] });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
