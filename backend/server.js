@@ -390,6 +390,19 @@ app.post("/api/mis-pedidos", async (req, res) => {
 });
 
 // ============================================
+// ENDPOINT PARA PRODUCTOS (INVENTARIO)
+// ============================================
+app.get("/productos", async (req, res) => {
+    try {
+        const result = await query(`SELECT * FROM productos ORDER BY id DESC`);
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Error en /productos:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ============================================
 // 4. ENDPOINTS ADMIN (clientes, empleados, áreas)
 // ============================================
 
@@ -571,6 +584,51 @@ app.get("/reporte-final", async (req, res) => {
     }
 });
 
+// ============================================
+// ENDPOINTS PARA PRODUCTOS (INVENTARIO)
+// ============================================
+
+// Obtener todos los productos
+app.get("/productos", async (req, res) => {
+    try {
+        const result = await query(`SELECT * FROM productos ORDER BY id DESC`);
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Error en GET /productos:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Crear un producto
+app.post("/crear-producto", upload.single("imagen"), async (req, res) => {
+    const { nombre, categoria, stock, costo, suplidor } = req.body;
+    const imagen = req.file ? req.file.filename : null;
+    const fecha = new Date().toLocaleDateString("es-DO", { timeZone: "America/Santo_Domingo" });
+    
+    try {
+        const result = await query(
+            `INSERT INTO productos (nombre, categoria, stock, costo, suplidor, imagen, fecha)
+             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+            [nombre, categoria, stock || 0, costo || 0, suplidor, imagen, fecha]
+        );
+        res.json({ mensaje: "Producto agregado", id: result.rows[0].id });
+    } catch (error) {
+        console.error("Error en POST /crear-producto:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Eliminar un producto
+app.delete("/eliminar-producto/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        await query(`DELETE FROM productos WHERE id = $1`, [id]);
+        res.json({ mensaje: "Producto eliminado" });
+    } catch (error) {
+        console.error("Error en DELETE /eliminar-producto:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
 // ============================================
 // 6. ENDPOINTS ÚTILES
 // ============================================
