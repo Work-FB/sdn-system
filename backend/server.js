@@ -191,6 +191,18 @@ const initDB = async () => {
             leido BOOLEAN DEFAULT FALSE
         )`);
 
+        await query(`
+    CREATE TABLE IF NOT EXISTS movimientos (
+        id SERIAL PRIMARY KEY,
+        producto_id INTEGER REFERENCES productos(id) ON DELETE CASCADE,
+        tipo TEXT NOT NULL,
+        cantidad INTEGER NOT NULL,
+        detalle TEXT,
+        fecha TEXT NOT NULL,
+        hora TEXT NOT NULL
+    )
+`);
+
         console.log("✅ Tablas creadas/verificadas");
     } catch (err) {
         console.error("❌ Error creando tablas:", err);
@@ -219,6 +231,8 @@ app.get("/public/menus", async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+
 
 app.post("/public/venta-rapida", async (req, res) => {
     const { producto, cantidad, precio } = req.body;
@@ -614,6 +628,69 @@ app.post("/crear-producto", upload.single("imagen"), async (req, res) => {
         res.json({ mensaje: "Producto agregado", id: result.rows[0].id });
     } catch (error) {
         console.error("Error en POST /crear-producto:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ============================================
+// ENDPOINTS PARA INVENTARIO (MOVIMIENTOS)
+// ============================================
+
+// Obtener todos los movimientos
+app.get("/movimientos", async (req, res) => {
+    try {
+        const result = await query(`
+            SELECT movimientos.*, productos.nombre 
+            FROM movimientos 
+            INNER JOIN productos ON productos.id = movimientos.producto_id 
+            ORDER BY movimientos.id DESC
+        `);
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Error en GET /movimientos:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Crear movimiento (entrada/salida)
+app.post("/crear-movimiento", async (req, res) => {
+    const { producto_id, tipo, cantidad, detalle } = req.body;
+    const ahora = new Date();
+    const fecha = ahora.toLocaleDateString("es-DO", { timeZone: "America/Santo_Domingo" });
+    const hora = ahora.toLocaleTimeString("es-DO", { 
+        timeZone: "America/Santo_Domingo", 
+        hour: "2-digit", 
+        minute: "2-digit", 
+        second: "2-digit" 
+    });
+    
+    try {
+        // Verificar producto
+        const producto = await query(`SELECT stock FROM productos WHERE id = $1`, [producto_id]);
+        if (!producto.rows[0]) {
+            return res.status(404).json({ error: "Producto no encontrado" });
+        }
+        
+        let nuevoStock = producto.rows[0].stock;
+        if (tipo === "ENTRADA") {
+            nuevoStock += parseInt(cantidad);
+        } else if (tipo === "SALIDA") {
+            nuevoStock = Math.max(0, nuevoStock - parseInt(cantidad));
+        }
+        
+        // Actualizar stock del producto
+        await query(`UPDATE productos SET stock = $1 WHERE id = $2`, [nuevoStock, producto_id]);
+        
+        // Registrar movimiento
+        await query(
+            `INSERT INTO movimientos(producto_id, tipo, cantidad, detalle, fecha, hora) 
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [producto_id, tipo, cantidad, detalle || null, fecha, hora]
+        );
+        
+        res.json({ mensaje: "Movimiento registrado", stock: nuevoStock });
+    } catch (error) {
+        console.error("Error en POST /crear-movimiento:", error);
         res.status(500).json({ error: error.message });
     }
 });
