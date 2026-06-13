@@ -99,12 +99,13 @@
         box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
     }
 
-    /* Main Content */
+    /* Main Content - SCROLL CORREGIDO */
     .content {
         flex: 1;
         margin-left: 280px;
-        overflow: auto;
         padding: 30px;
+        overflow-y: auto;
+        height: 100vh;
     }
 
     /* Topbar */
@@ -238,11 +239,11 @@
         transform: translateY(-2px);
     }
 
-    /* Tabla */
+    /* Tabla - SCROLL HORIZONTAL */
     .table-container {
         background: white;
         border-radius: 24px;
-        overflow: auto;
+        overflow-x: auto;
         box-shadow: 0 5px 20px rgba(0,0,0,0.05);
     }
 
@@ -332,15 +333,21 @@
         }
     }
 
+    /* Scrollbar personalizado */
     ::-webkit-scrollbar {
         width: 8px;
+        height: 8px;
     }
     ::-webkit-scrollbar-track {
         background: #f0e6d8;
+        border-radius: 10px;
     }
     ::-webkit-scrollbar-thumb {
         background: #2e7d32;
         border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #1b5e20;
     }
 </style>
 </head>
@@ -455,7 +462,7 @@
     setInterval(actualizarReloj, 1000);
     actualizarReloj();
 
-    // Cargar productos para el select
+    // Cargar productos
     async function cargarProductos() {
         try {
             const response = await fetch(`${API_URL}/productos`);
@@ -539,8 +546,6 @@
             return;
         }
         
-        const producto = productos.find(p => p.id == productoId);
-        
         try {
             const response = await fetch(`${API_URL}/crear-movimiento`, {
                 method: 'POST',
@@ -556,11 +561,9 @@
             const data = await response.json();
             alert(`${data.mensaje}\nNuevo stock: ${data.stock}`);
             
-            // Limpiar formulario
             document.getElementById('cantidadInput').value = '';
             document.getElementById('detalleInput').value = '';
             
-            // Recargar datos
             cargarProductos();
             cargarMovimientos();
         } catch (error) {
@@ -580,7 +583,6 @@
         document.getElementById('sidebar').classList.toggle('open');
     });
 
-    // Inicializar
     cargarProductos();
     cargarMovimientos();
 </script>

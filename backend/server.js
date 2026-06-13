@@ -232,7 +232,66 @@ app.get("/public/menus", async (req, res) => {
     }
 });
 
+// ============================================
+// ENDPOINTS PARA EMPLEADOS
+// ============================================
 
+// Obtener todos los empleados
+app.get("/empleados-completo", async (req, res) => {
+    try {
+        const result = await query(`SELECT * FROM usuarios ORDER BY id DESC`);
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Error en GET /empleados-completo:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Crear empleado
+app.post("/crear-empleado", async (req, res) => {
+    const { nombre, usuario, password, rol, telefono, salario } = req.body;
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const fechaIngreso = new Date().toLocaleDateString("es-DO", { timeZone: "America/Santo_Domingo" });
+        
+        const result = await query(
+            `INSERT INTO usuarios (nombre, usuario, password, rol, telefono, salario, estado, fecha_ingreso)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+            [nombre, usuario, hashedPassword, rol || 'empleado', telefono || null, salario || 0, 'Activo', fechaIngreso]
+        );
+        
+        res.json({ mensaje: "Empleado creado correctamente", id: result.rows[0].id });
+    } catch (error) {
+        console.error("Error en POST /crear-empleado:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Eliminar empleado
+app.delete("/eliminar-empleado/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await query(`DELETE FROM usuarios WHERE id = $1 RETURNING id`, [id]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "Empleado no encontrado" });
+        }
+        res.json({ mensaje: "Empleado eliminado correctamente" });
+    } catch (error) {
+        console.error("Error en DELETE /eliminar-empleado/:id:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Obtener lista simple de empleados (para selects)
+app.get("/empleados", async (req, res) => {
+    try {
+        const result = await query(`SELECT id, nombre FROM usuarios ORDER BY nombre`);
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Error en GET /empleados:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
 app.post("/public/venta-rapida", async (req, res) => {
     const { producto, cantidad, precio } = req.body;
