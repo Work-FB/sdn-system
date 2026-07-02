@@ -788,6 +788,94 @@ app.get("/crear-admin", async (req, res) => {
     }
 });
 
+app.post("/guardar-cuadre", async (req, res) => {
+    const { total_ventas, total_efectivo, productos } = req.body;
+    const ahora = new Date();
+    const fecha = ahora.toLocaleDateString("es-DO", { timeZone: "America/Santo_Domingo" });
+    const hora = ahora.toLocaleTimeString("es-DO", { timeZone: "America/Santo_Domingo", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    
+    try {
+        const result = await query(
+            `INSERT INTO cuadres(fecha, hora, total_ventas, total_efectivo) VALUES ($1, $2, $3, $4) RETURNING id`,
+            [fecha, hora, total_ventas, total_efectivo]
+        );
+        const cuadreID = result.rows[0].id;
+        
+        if (productos && productos.length > 0) {
+            for (const prod of productos) {
+                await query(`INSERT INTO productos_vendidos(cuadre_id, producto, precio) VALUES ($1, $2, $3)`,
+                    [cuadreID, prod.nombre, prod.precio]);
+            }
+        }
+        res.json({ mensaje: "Cuadre guardado correctamente", diferencia: total_efectivo - total_ventas });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post("/guardar-dolares", async (req, res) => {
+    const { uno, dos, cinco, diez, veinte, cincuenta, cien, tasa } = req.body;
+    const totalUSD = (uno*1) + (dos*2) + (cinco*5) + (diez*10) + (veinte*20) + (cincuenta*50) + (cien*100);
+    const totalDOP = totalUSD * tasa;
+    const ahora = new Date();
+    const fecha = ahora.toLocaleDateString("es-DO", { timeZone: "America/Santo_Domingo" });
+    const hora = ahora.toLocaleTimeString("es-DO", { timeZone: "America/Santo_Domingo", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    
+    try {
+        await query(
+            `INSERT INTO dolares(uno, dos, cinco, diez, veinte, cincuenta, cien, tasa, total_usd, total_dop, fecha, hora)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+            [uno, dos, cinco, diez, veinte, cincuenta, cien, tasa, totalUSD, totalDOP, fecha, hora]
+        );
+        res.json({ mensaje: "Dólares registrados", totalUSD, totalDOP });
+    } catch (error) {
+        console.error("Error guardando dólares:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ============================================
+// HISTORIAL DE CUADRES
+// ============================================
+app.get("/historial-cuadres", async (req, res) => {
+    try {
+        const result = await query(`SELECT * FROM cuadres ORDER BY id DESC`);
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Error en /historial-cuadres:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ============================================
+// DEPÓSITOS
+// ============================================
+app.post("/crear-deposito", async (req, res) => {
+    const { cliente, monto, banco, referencia } = req.body;
+    const { fecha, hora } = getFechaHora();
+    
+    try {
+        await query(
+            `INSERT INTO depositos(cliente, monto, banco, referencia, fecha, hora) VALUES ($1, $2, $3, $4, $5, $6)`,
+            [cliente, monto, banco, referencia, fecha, hora]
+        );
+        res.json({ mensaje: "Depósito registrado" });
+    } catch (error) {
+        console.error("Error en POST /crear-deposito:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get("/depositos", async (req, res) => {
+    try {
+        const result = await query(`SELECT * FROM depositos ORDER BY id DESC`);
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Error en GET /depositos:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
 // ============================================
 // INICIAR SERVIDOR
 // ============================================
